@@ -1,53 +1,66 @@
-public class MyFile {
-    private String name;
-    private int size;
-    private int requiredBlocks;
-    private int startBlock;
-    private int endBlock;
-    private List<String> content;
+package file_system;
 
-    public MyFile(String name, int size, List<String> content) {
-        this.name = name;
-        this.size = size;
-        this.requiredBlocks = size % Block.SIZE != 0 ? (size / Block.SIZE) + 1 : size / Block.SIZE;
-        this.content = content;
+import memory.Disk;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+public class FileSystem {
+    private Directory root;
+    private Directory current;
+    private static final String ROOT_PATH = "programs";
+
+    public FileSystem(Disk disk) {
+        root = new Directory(ROOT_PATH, null);
+        current = root;
+        createTree(root, new File(ROOT_PATH), disk);
     }
 
-    public String getName() {
-        return name;
+    public Directory getRoot() {
+        return root;
     }
 
-    public int getSize() {
-        return size;
+    public Directory getCurrent() {
+        return current;
     }
 
-    public int getRequiredBlocks() {
-        return requiredBlocks;
+    private void createTree(Directory dir, File root, Disk disk) {
+        for (File child : root.listFiles()) {
+            if (child.isDirectory()) {
+                Directory newDir = new Directory(child.getName(), dir);
+                dir.addChildDirectory(newDir);
+                createTree(newDir, child, disk);
+            } else {
+                try {
+                    dir.addChildFile(new MyFile(child.getName(), (int) child.length(), Files.readAllLines(Path.of(child.getPath()))), disk);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
-    public int getStartBlock() {
-        return startBlock;
+    public void changeDirectory(String name) {
+        if (name.equals("..") && current != root)
+            current = current.getParent();
+        else {
+            Directory childDir = current.getChildDirectoryByName(name);
+
+            if (childDir == null)
+                throw new IllegalArgumentException("Directory " + name + " does not exist!\n");
+
+            current = childDir;
+        }
     }
 
-    public int getEndBlock() {
-        return endBlock;
+    public void makeDirectory(String name) {
+        current.addChildDirectory(new Directory(name, current));
     }
 
-    public List<String> getContent() {
-        return content;
-    }
 
-    public void setStartBlock(int startBlock) {
-        this.startBlock = startBlock;
-    }
-
-    public void setEndBlock(int endBlock) {
-        this.endBlock = endBlock;
-    }
-
-    @Override
-    public String toString() {
-        return name;
+    public String listFiles() {
+        return current.toString();
     }
 }
-
