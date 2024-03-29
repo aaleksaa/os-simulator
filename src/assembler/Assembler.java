@@ -4,6 +4,8 @@ import cpu.CPU;
 import cpu.ProcessState;
 import cpu.Register;
 import cpu.Process;
+import file_system.FileSystem;
+import memory.Disk;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,23 +97,26 @@ public class Assembler {
 //        INC R2
 //        INC R3
 //        HALT
-        List<String> test = new ArrayList<>();
-        test.add("ADD R1,10");
-        test.add("ADD R2,5");
-        test.add("MUL R1,R2");
-        test.add("ADD R3,R1");
-        test.add("SUB R3,R2");
-        test.add("INC R1");
-        test.add("INC R2");
-        test.add("INC R3");
-        test.add("HALT");
+//        List<String> test = new ArrayList<>();
+//        test.add("ADD R1,10");
+//        test.add("ADD R2,5");
+//        test.add("MUL R1,R2");
+//        test.add("ADD R3,R1");
+//        test.add("SUB R3,R2");
+//        test.add("INC R1");
+//        test.add("INC R2");
+//        test.add("INC R3");
+//        test.add("HALT");
+//
+//        CPU cpu = new CPU();
+//
+//        for (String s : test) {
+//            String ins = Assembler.transformAssemblyToMachineCode(cpu, s);
+//            cpu.executeMachineCode(ins);
+//        }
 
-        CPU cpu = new CPU();
-
-        for (String s : test) {
-            String ins = Assembler.transformAssemblyToMachineCode(cpu, s);
-            cpu.executeMachineCode(ins);
-        }
-
+        Disk disk = new Disk();
+        FileSystem fs = new FileSystem(disk);
+        System.out.println(fs.listFiles());
     }
 }
