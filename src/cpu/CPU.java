@@ -1,5 +1,8 @@
 package cpu;
 
+import assembler.Assembler;
+import assembler.Instruction;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -7,7 +10,7 @@ import java.util.List;
 public class CPU {
     private Register R1, R2, R3, R4;
     private List<Register> generalRegisters = new ArrayList<>();
-    private Process currentProcess;
+    private Process currentProcess = null;
 
     public CPU() {
         R1 = new Register("R1", "0000");
@@ -16,6 +19,34 @@ public class CPU {
         R4 = new Register("R4", "0011");
 
         Collections.addAll(generalRegisters, R1, R2, R3, R4);
+    }
+
+    public void executeMachineCode(String input) {
+        String instruction = input.substring(0, 4);
+        System.out.println(printRegisters());
+
+        if (instruction.equals(Instruction.HALT.getOperationCode()))
+            Assembler.halt(currentProcess);
+        else if (instruction.equals(Instruction.ADD.getOperationCode())) {
+            String s1 = input.substring(4, 8);
+            String s2 = input.length() == 12 ? input.substring(8, 12) : input.substring(8, 16);
+            Assembler.add(this, s1, s2);
+        } else if (instruction.equals(Instruction.SUB.getOperationCode())) {
+            String s1 = input.substring(4, 8);
+            String s2 = input.length() == 12 ? input.substring(8, 12) : input.substring(8, 16);
+            Assembler.sub(this, s1, s2);
+        } else if (instruction.equals(Instruction.MUL.getOperationCode())) {
+            String s1 = input.substring(4, 8);
+            String s2 = input.length() == 12 ? input.substring(8, 12) : input.substring(8, 16);
+            Assembler.mul(this, s1, s2);
+        } else if (instruction.equals(Instruction.DEC.getOperationCode())) {
+            String s1 = input.substring(4, 8);
+            Assembler.dec(this, s1);
+        } else if (instruction.equals(Instruction.INC.getOperationCode())) {
+            String s1 = input.substring(4, 8);
+            Assembler.inc(this, s1);
+        }
+
     }
 
     public Register getRegisterByAddress(String address) {
@@ -32,9 +63,13 @@ public class CPU {
         return null;
     }
 
-    public void printRegisters() {
+    public String printRegisters() {
+        StringBuilder sb = new StringBuilder();
+
         for (Register reg : generalRegisters)
-            System.out.println(reg);
+            sb.append(reg).append("\n");
+
+        return sb.toString();
     }
 
     public void clearRegisters() {

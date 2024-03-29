@@ -61,7 +61,7 @@ public class Directory implements Comparable<Directory> {
 
     public void addChildFile(MyFile file, Disk disk) {
         files.add(file);
-        disk.allocateFile(file);
+        //disk.allocateFile(file);
     }
 
     @Override

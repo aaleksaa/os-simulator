@@ -1,7 +1,9 @@
 package assembler;
 
 import cpu.CPU;
+import cpu.ProcessState;
 import cpu.Register;
+import cpu.Process;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +39,7 @@ public class Assembler {
     }
 
     public static void halt(Process process) {
-
+        process.setState(ProcessState.FINISHED);
     }
 
     public static void mov(CPU cpu, String address1, String address2) {
@@ -106,7 +108,10 @@ public class Assembler {
 
         CPU cpu = new CPU();
 
-        for (String s : test)
-            System.out.println(transformAssemblyToMachineCode(cpu, s));
+        for (String s : test) {
+            String ins = Assembler.transformAssemblyToMachineCode(cpu, s);
+            cpu.executeMachineCode(ins);
+        }
+
     }
 }

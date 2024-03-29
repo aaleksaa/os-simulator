@@ -29,6 +29,10 @@ public class Process {
         this.state = state;
     }
 
+    public void setCode(List<String> code) {
+        this.code = code;
+    }
+
     public boolean isReady() {
         return state == ProcessState.READY;
     }
