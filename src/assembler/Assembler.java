@@ -36,7 +36,7 @@ public class Assembler {
         return sb.toString();
     }
 
-    public static void halt() {
+    public static void halt(Process process) {
 
     }
 

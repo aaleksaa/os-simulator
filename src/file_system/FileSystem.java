@@ -10,7 +10,7 @@ import java.nio.file.Path;
 public class FileSystem {
     private Directory root;
     private Directory current;
-    private static final String ROOT_PATH = "programs";
+    private static final String ROOT_PATH = "root";
 
     public FileSystem(Disk disk) {
         root = new Directory(ROOT_PATH, null);

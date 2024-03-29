@@ -7,6 +7,7 @@ import java.util.List;
 public class CPU {
     private Register R1, R2, R3, R4;
     private List<Register> generalRegisters = new ArrayList<>();
+    private Process currentProcess;
 
     public CPU() {
         R1 = new Register("R1", "0000");
