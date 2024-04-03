@@ -26,6 +26,18 @@ public class Frame {
         return page;
     }
 
+    public void setPage(Page page) {
+        this.page = page;
+        allocated = true;
+        bytesAllocated = page.getSize();
+    }
+
+    public void free() {
+        page = null;
+        bytesAllocated = 0;
+        allocated = false;
+    }
+
     @Override
     public String toString() {
         return frameNumber;

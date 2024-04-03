@@ -1,7 +1,12 @@
 package memory;
 
+import cpu.Process;
+import cpu.ProcessState;
+
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class RAM {
     private final int size;
@@ -9,6 +14,8 @@ public class RAM {
     private List<Integer> freeFrames = new ArrayList<>();
     private int frameSize;
     private int numberOfFrames;
+    private Queue<Process> readyQueue = new LinkedList<>();
+    private Process currentProcess = null;
 
     public RAM() {
         this.size = 4096;
@@ -21,6 +28,7 @@ public class RAM {
         this.size = 4096;
         this.frameSize = frameSize;
         this.numberOfFrames = size / frameSize;
+        init(numberOfFrames);
     }
 
     private void init(int n) {
@@ -28,7 +36,7 @@ public class RAM {
             String binaryNumber = decToBinary(i);
             String newBinary = "";
 
-            for (int j = 0; j < powerOfTwo(n - binaryNumber.length()); j++)
+            for (int j = 0; j < powerOfTwo(n) - binaryNumber.length(); j++)
                 newBinary += "0";
 
             newBinary += binaryNumber;
@@ -59,6 +67,34 @@ public class RAM {
         return freeFrames;
     }
 
+    public void load(Process process) {
+        List<Page> pages = process.getPages();
+        int numberOfPages = pages.size();
+        int pageCounter = 0;
+
+        if (freeFrames.size() < numberOfPages)
+            throw new IllegalArgumentException("Not enough space for process!");
+
+        while (pageCounter < numberOfPages) {
+            int index = freeFrames.get(0);
+            process.addToPageTable(frames.get(index).getFrameNumber());
+            frames.get(index).setPage(pages.get(pageCounter++));
+            freeFrames.remove(0);
+        }
+
+        readyQueue.add(process);
+        process.setState(ProcessState.READY);
+    }
+
+    public void remove(Process process) {
+        List<String> pageTable = process.getPageTable();
+        for (int i = 0; i < pageTable.size(); i++) {
+            int index = Integer.parseInt(pageTable.get(i), 2);
+            frames.get(index).free();
+            freeFrames.add(index);
+        }
+    }
+
     private static String decToBinary(int n) {
         String binaryNumber = "";
         int[] binaryNum = new int[1000];
@@ -76,6 +112,7 @@ public class RAM {
         return binaryNumber;
     }
 
+
     private static int powerOfTwo(int size) {
         int i = 1;
         int counter = 0;
@@ -92,5 +129,9 @@ public class RAM {
         RAM ram = new RAM();
         for (Frame f : ram.frames)
             System.out.println(f);
+    }
+
+    public void printFreeNum() {
+        System.out.println(freeFrames.size());
     }
 }

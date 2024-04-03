@@ -12,12 +12,12 @@ import java.util.List;
 public class Process {
     private String name;
     private ProcessState state;
-    private List<Page> pageTable = new ArrayList<>();
+    private List<Page> pages = new ArrayList<>();
+    private List<String> pageTable = new ArrayList<>();
     private List<String> code = new ArrayList<>();
 
     public Process(String name, Disk disk, CPU cpu, RAM ram) {
         this.name = name;
-        this.state = ProcessState.READY;
         readFile(name, disk, cpu);
         splitPages(ram);
     }
@@ -43,7 +43,7 @@ public class Process {
                     counter++;
                 }
 
-            pageTable.add(page);
+            pages.add(page);
         }
     }
 
@@ -59,6 +59,14 @@ public class Process {
         this.code = code;
     }
 
+    public List<Page> getPages() {
+        return pages;
+    }
+
+    public List<String> getPageTable() {
+        return pageTable;
+    }
+
     public boolean isReady() {
         return state == ProcessState.READY;
     }
@@ -70,5 +78,24 @@ public class Process {
     public boolean isFinished() {
         return state == ProcessState.FINISHED;
     }
-    
+
+    public void addToPageTable(String frameNumber) {
+        pageTable.add(frameNumber);
+    }
+
+    public static void main(String[] args) {
+        Disk disk = new Disk();
+        RAM ram = new RAM();
+        CPU cpu = new CPU();
+        FileSystem fileSystem = new FileSystem(disk);
+        Process p = new Process("test.asm", disk, cpu, ram);
+
+        ram.load(p);
+        ram.printFreeNum();
+        System.out.println(p.pages);
+        System.out.println(p.pageTable);
+        ram.remove(p);
+        System.out.println("----------");
+        ram.printFreeNum();
+    }
 }
