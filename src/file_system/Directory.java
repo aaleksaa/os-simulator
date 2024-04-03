@@ -103,4 +103,16 @@ public class Directory implements Comparable<Directory> {
     public int hashCode() {
         return Objects.hash(name, parent, directories, files);
     }
+
+    public MyFile getChildFileByName(String name) {
+        for (MyFile file : files)
+            if (file.getName().equals(name))
+                return file;
+        return null;
+    }
+
+    public void removeChildFile(MyFile file, Disk disk) {
+        files.remove(file);
+        disk.deallocateFile(file);
+}
 }

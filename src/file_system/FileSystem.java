@@ -64,3 +64,14 @@ public class FileSystem {
         return current.toString();
     }
 }
+public void removeFileOrDirectory(String name, Disk disk) {
+    MyFile file = current.getChildFileByName(name);
+    Directory directory = current.getChildDirectoryByName(name);
+
+    if (file != null)
+        current.removeChildFile(file, disk);
+    else if (directory != null)
+        current.removeChildDirectory(directory);
+    else
+        throw new IllegalArgumentException("Directory or file with name " + name + " does not exist in " + current.getName());
+}
