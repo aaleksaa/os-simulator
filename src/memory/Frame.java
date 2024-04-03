@@ -25,4 +25,9 @@ public class Frame {
     public Page getPage() {
         return page;
     }
+
+    @Override
+    public String toString() {
+        return frameNumber;
+    }
 }

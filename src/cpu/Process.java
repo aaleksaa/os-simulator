@@ -1,8 +1,10 @@
 package cpu;
 
 import assembler.Assembler;
+import file_system.FileSystem;
 import memory.Disk;
 import memory.Page;
+import memory.RAM;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +15,11 @@ public class Process {
     private List<Page> pageTable = new ArrayList<>();
     private List<String> code = new ArrayList<>();
 
-    public Process(String name, Disk disk, CPU cpu) {
+    public Process(String name, Disk disk, CPU cpu, RAM ram) {
         this.name = name;
         this.state = ProcessState.READY;
         readFile(name, disk, cpu);
+        splitPages(ram);
     }
 
     private void readFile(String name, Disk disk, CPU cpu) {
@@ -26,8 +29,22 @@ public class Process {
             code.add(Assembler.transformAssemblyToMachineCode(cpu, line));
     }
 
-    private void splitPages() {
+    private void splitPages(RAM ram) {
+        int frameSize = ram.getFrameSize();
+        int number = frameSize / 16;
+        int counter = 0;
 
+        while (counter < code.size()) {
+            Page page = new Page();
+
+            for (int i = 0; i < number; i++)
+                if (counter < code.size()) {
+                    page.add(code.get(counter));
+                    counter++;
+                }
+
+            pageTable.add(page);
+        }
     }
 
     public void setState(ProcessState state) {
@@ -53,4 +70,5 @@ public class Process {
     public boolean isFinished() {
         return state == ProcessState.FINISHED;
     }
+    
 }
