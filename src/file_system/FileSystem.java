@@ -63,15 +63,27 @@ public class FileSystem {
     public String listFiles() {
         return current.toString();
     }
-}
-public void removeFileOrDirectory(String name, Disk disk) {
-    MyFile file = current.getChildFileByName(name);
-    Directory directory = current.getChildDirectoryByName(name);
 
-    if (file != null)
-        current.removeChildFile(file, disk);
-    else if (directory != null)
-        current.removeChildDirectory(directory);
-    else
-        throw new IllegalArgumentException("Directory or file with name " + name + " does not exist in " + current.getName());
+    public void removeFileOrDirectory(String name, Disk disk) {
+        MyFile file = current.getChildFileByName(name);
+        Directory directory = current.getChildDirectoryByName(name);
+
+        if (file != null)
+            current.removeChildFile(file, disk);
+        else if (directory != null)
+            current.removeChildDirectory(directory);
+        else
+            throw new IllegalArgumentException("Directory or file with name " + name + " does not exist in " + current.getName());
+    }
+
+    public void renameDirectory(String oldName, String newName) {
+        Directory dir = current.getChildDirectoryByName(oldName);
+
+        if (dir == null)
+            throw new IllegalArgumentException("Directory with name " + oldName + " does not exist in " + current.getName());
+        if (current.getChildDirectoryByName(newName) != null)
+            throw new IllegalArgumentException("Directory with name " + newName + " is already in " + current.getName());
+
+        dir.setName(newName);
+    }
 }
