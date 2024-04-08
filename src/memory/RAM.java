@@ -25,7 +25,7 @@ public class RAM {
     }
 
     public RAM(int size, int frameSize) {
-        this.size = 4096;
+        this.size = size;
         this.frameSize = frameSize;
         this.numberOfFrames = size / frameSize;
         init(numberOfFrames);
@@ -41,10 +41,8 @@ public class RAM {
 
             newBinary += binaryNumber;
             frames.add(new Frame(newBinary));
-        }
-
-        for (int i = 0; i < n; i++)
             freeFrames.add(i);
+        }
     }
 
     public int getSize() {
@@ -123,15 +121,5 @@ public class RAM {
         }
 
         return (i / 2 == size) ? --counter : -1;
-    }
-
-    public static void main(String[] args) {
-        RAM ram = new RAM();
-        for (Frame f : ram.frames)
-            System.out.println(f);
-    }
-
-    public void printFreeNum() {
-        System.out.println(freeFrames.size());
     }
 }

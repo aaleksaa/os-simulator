@@ -1,25 +1,32 @@
 package cpu;
 
 import assembler.Assembler;
-import file_system.FileSystem;
 import memory.Disk;
 import memory.Page;
 import memory.RAM;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class Process {
+    private int id;
     private String name;
+    private int remainingTime;
     private ProcessState state;
     private List<Page> pages = new ArrayList<>();
     private List<String> pageTable = new ArrayList<>();
     private List<String> code = new ArrayList<>();
+    public final static Comparator<Process> compareRT = (o1, o2) -> Integer.compare(o1.remainingTime, o2.remainingTime);
+    public final static Comparator<Process> compareID = (o1, o2) -> Integer.compare(o1.id, o2.id);
 
-    public Process(String name, Disk disk, CPU cpu, RAM ram) {
+    public Process(int id, String name, Disk disk, CPU cpu, RAM ram) {
+        this.id = id;
         this.name = name;
         readFile(name, disk, cpu);
         splitPages(ram);
+        this.remainingTime = code.size();
+        this.state = ProcessState.RUNNING;
     }
 
     private void readFile(String name, Disk disk, CPU cpu) {
@@ -83,19 +90,7 @@ public class Process {
         pageTable.add(frameNumber);
     }
 
-    public static void main(String[] args) {
-        Disk disk = new Disk();
-        RAM ram = new RAM();
-        CPU cpu = new CPU();
-        FileSystem fileSystem = new FileSystem(disk);
-        Process p = new Process("test.asm", disk, cpu, ram);
-
-        ram.load(p);
-        ram.printFreeNum();
-        System.out.println(p.pages);
-        System.out.println(p.pageTable);
-        ram.remove(p);
-        System.out.println("----------");
-        ram.printFreeNum();
+    public String getName() {
+        return name;
     }
 }

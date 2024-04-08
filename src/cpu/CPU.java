@@ -10,6 +10,8 @@ import java.util.List;
 public class CPU {
     private Register R1, R2, R3, R4;
     private List<Register> generalRegisters = new ArrayList<>();
+    private String instructionRegister;
+    private int programCounter;
     private Process currentProcess = null;
 
     public CPU() {
@@ -19,6 +21,19 @@ public class CPU {
         R4 = new Register("R4", "0011");
 
         Collections.addAll(generalRegisters, R1, R2, R3, R4);
+    }
+
+    public void execute(Process process) {
+        currentProcess = process;
+        System.out.println("Process " + process.getName() + " started execution!");
+        while (process.isRunning()) {
+            instructionRegister = process.getCode().get(programCounter);
+            System.out.println(programCounter);
+            System.out.println(instructionRegister);
+            executeMachineCode(instructionRegister);
+        }
+        programCounter = 0;
+        clearRegisters();
     }
 
     public void executeMachineCode(String input) {
@@ -47,6 +62,7 @@ public class CPU {
             Assembler.inc(this, s1);
         }
 
+        programCounter++;
     }
 
     public Register getRegisterByAddress(String address) {

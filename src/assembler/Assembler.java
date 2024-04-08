@@ -86,37 +86,4 @@ public class Assembler {
         Register reg = cpu.getRegisterByAddress(address);
         reg.decrementValue(1);
     }
-
-    public static void main(String[] args) {
-//        ADD R1,10
-//        ADD R2,5
-//        MUL R1,R2
-//        ADD R3,R1
-//        SUB R3,R2
-//        INC R1
-//        INC R2
-//        INC R3
-//        HALT
-//        List<String> test = new ArrayList<>();
-//        test.add("ADD R1,10");
-//        test.add("ADD R2,5");
-//        test.add("MUL R1,R2");
-//        test.add("ADD R3,R1");
-//        test.add("SUB R3,R2");
-//        test.add("INC R1");
-//        test.add("INC R2");
-//        test.add("INC R3");
-//        test.add("HALT");
-//
-//        CPU cpu = new CPU();
-//
-//        for (String s : test) {
-//            String ins = Assembler.transformAssemblyToMachineCode(cpu, s);
-//            cpu.executeMachineCode(ins);
-//        }
-
-        Disk disk = new Disk();
-        FileSystem fs = new FileSystem(disk);
-        System.out.println(fs.listFiles());
-    }
 }

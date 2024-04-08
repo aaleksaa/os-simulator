@@ -71,7 +71,7 @@ public class FileSystem {
         if (file != null)
             current.removeChildFile(file, disk);
         else if (directory != null)
-            current.removeChildDirectory(directory);
+            current.removeChildDirectory(directory, disk);
         else
             throw new IllegalArgumentException("Directory or file with name " + name + " does not exist in " + current.getName());
     }
