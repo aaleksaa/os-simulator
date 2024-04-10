@@ -1,7 +1,6 @@
 package cpu;
 
 import java.util.PriorityQueue;
-import java.util.Queue;
 
 public class ProcessScheduler extends Thread {
     private CPU cpu;
@@ -10,7 +9,7 @@ public class ProcessScheduler extends Thread {
 
     public ProcessScheduler(CPU cpu) {
         this.cpu = cpu;
-        this.queue = new PriorityQueue<>(Process.compareRT);;
+        this.queue = new PriorityQueue<>(Process.compareRT);
     }
 
     public PriorityQueue<Process> getQueue() {
@@ -30,7 +29,23 @@ public class ProcessScheduler extends Thread {
     public void run() {
         while (!queue.isEmpty()) {
             Process process = queue.poll();
-            cpu.execute(process);
+            runProcess(process);
+        }
+    }
+
+    private void runProcess(Process process) {
+        cpu.setCurrentProcess(process);
+
+        if (process.getProgramCounter() == -1) {
+            System.out.println("Process " + process.getName() + " (ID = " + process.getId() + ") started execution.");
+            cpu.getPC().setValue(0);
+            process.setState(ProcessState.RUNNING);
+            cpu.execute();
+        } else {
+            System.out.println("Process " + process.getName() + " (ID = " + process.getId() + ") continued execution.");
+            cpu.loadValuesOfRegisters();
+            process.setState(ProcessState.RUNNING);
+            cpu.execute();
         }
     }
 }
