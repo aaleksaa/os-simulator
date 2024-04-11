@@ -2,9 +2,7 @@ package file_system;
 
 import memory.Disk;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Directory implements Comparable<Directory> {
     private String name;
@@ -35,6 +33,22 @@ public class Directory implements Comparable<Directory> {
         return files;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setParent(Directory parent) {
+        this.parent = parent;
+    }
+
+    public void setDirectories(List<Directory> directories) {
+        this.directories = directories;
+    }
+
+    public void setFiles(List<MyFile> files) {
+        this.files = files;
+    }
+
     public boolean isEmpty() {
         return files.isEmpty() && directories.isEmpty();
     }
@@ -53,21 +67,34 @@ public class Directory implements Comparable<Directory> {
         directories.add(dir);
     }
 
-    public void removeChildDirectory(Directory dir) {
-        if (!directories.contains(dir))
-            throw new IllegalArgumentException("Directory " + dir.getName() + " does not exist!\n");
+    public void removeChildDirectory(Directory dir, Disk disk) {
+        Iterator<Directory> dirIterator = dir.getDirectories().iterator();
+        while (dirIterator.hasNext()) {
+            Directory childDir = dirIterator.next();
+            removeChildDirectory(childDir, disk);
+            dirIterator.remove();
+        }
+
+        Iterator<MyFile> fileIterator = dir.getFiles().iterator();
+        while (fileIterator.hasNext()) {
+            MyFile file = fileIterator.next();
+            removeChildFile(file, disk);
+            fileIterator.remove();
+        }
+
         directories.remove(dir);
     }
 
+
     public void addChildFile(MyFile file, Disk disk) {
         files.add(file);
-        //disk.allocateFile(file);
+        disk.allocateFile(file);
     }
 
     @Override
     public String toString() {
         if (isEmpty())
-            return "Directory " + name + " is empty!";
+            return "Current directory " + name + " is empty!";
 
         StringBuilder sb = new StringBuilder();
         sb.append("Current directory ").append(name).append("\n");
@@ -102,5 +129,17 @@ public class Directory implements Comparable<Directory> {
     @Override
     public int hashCode() {
         return Objects.hash(name, parent, directories, files);
+    }
+
+    public MyFile getChildFileByName(String name) {
+        for (MyFile file : files)
+            if (file.getName().equals(name))
+                return file;
+        return null;
+    }
+
+    public void removeChildFile(MyFile file, Disk disk) {
+        files.remove(file);
+        disk.deallocateFile(file);
     }
 }
