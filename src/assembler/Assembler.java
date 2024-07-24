@@ -4,11 +4,7 @@ import cpu.CPU;
 import cpu.ProcessState;
 import cpu.Register;
 import cpu.Process;
-import file_system.FileSystem;
-import memory.Disk;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class Assembler {
     private static int convertBinary(String binaryValue) {

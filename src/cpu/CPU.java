@@ -9,10 +9,11 @@ import java.util.List;
 
 public class CPU {
     private Register R1, R2, R3, R4, PC, IR;
-    private List<Register> generalRegisters = new ArrayList<>();
-    private Process currentProcess = null;
+    private List<Register> generalRegisters;
+    private Process currentProcess;
 
     public CPU() {
+        this.generalRegisters = new ArrayList<>();
         R1 = new Register("R1", "0000");
         R2 = new Register("R2", "0001");
         R3 = new Register("R3", "0010");

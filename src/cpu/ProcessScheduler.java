@@ -37,12 +37,12 @@ public class ProcessScheduler extends Thread {
         cpu.setCurrentProcess(process);
 
         if (process.getProgramCounter() == -1) {
-            System.out.println("Process " + process.getName() + " (ID = " + process.getId() + ") started execution.");
+            System.out.println("Process " + process.getName() + " (ID = " + process.getPid() + ") started execution.");
             cpu.getPC().setValue(0);
             process.setState(ProcessState.RUNNING);
             cpu.execute();
         } else {
-            System.out.println("Process " + process.getName() + " (ID = " + process.getId() + ") continued execution.");
+            System.out.println("Process " + process.getName() + " (ID = " + process.getPid() + ") continued execution.");
             cpu.loadValuesOfRegisters();
             process.setState(ProcessState.RUNNING);
             cpu.execute();

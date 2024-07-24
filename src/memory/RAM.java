@@ -10,17 +10,20 @@ import java.util.Queue;
 
 public class RAM {
     private final int size;
-    private List<Frame> frames = new ArrayList<>();
-    private List<Integer> freeFrames = new ArrayList<>();
+    private List<Frame> frames;
+    private List<Integer> freeFrames;
     private int frameSize;
     private int numberOfFrames;
-    private Queue<Process> readyQueue = new LinkedList<>();
-    private Process currentProcess = null;
+    private Queue<Process> readyQueue;
+    private Process currentProcess;
 
     public RAM() {
         this.size = 4096;
         this.frameSize = 32;
         this.numberOfFrames = 128;
+        this.frames = new ArrayList<>();
+        this.freeFrames = new ArrayList<>();
+        this.readyQueue = new LinkedList<>();
         init(numberOfFrames);
     }
 

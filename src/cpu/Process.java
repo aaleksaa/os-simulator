@@ -11,20 +11,23 @@ import java.util.Comparator;
 import java.util.List;
 
 public class Process {
-    private int id;
-    private String name;
+    private final int pid;
+    private final String name;
     private int remainingTime;
     private ProcessState state;
-    private List<Page> pages = new ArrayList<>();
-    private List<String> pageTable = new ArrayList<>();
-    private List<String> code = new ArrayList<>();
+    private List<Page> pages;
+    private List<String> pageTable;
+    private List<String> code;
     private int[] valueOfRegisters = new int[4];
     private int programCounter = -1;
     public final static Comparator<Process> compareRT = (o1, o2) -> Integer.compare(o1.remainingTime, o2.remainingTime);
 
     public Process(int id, String name, Disk disk, CPU cpu, RAM ram) {
-        this.id = id;
+        this.pid = id;
         this.name = name;
+        this.pages = new ArrayList<>();
+        this.pageTable = new ArrayList<>();
+        this.code = new ArrayList<>();
         readFile(name, disk, cpu);
         splitPages(ram);
         this.state = ProcessState.READY;
@@ -56,8 +59,8 @@ public class Process {
         }
     }
 
-    public int getId() {
-        return id;
+    public int getPid() {
+        return pid;
     }
 
     public String getName() {
