@@ -6,6 +6,8 @@ import file_system.FileSystem;
 import memory.Disk;
 import memory.RAM;
 
+import java.util.Scanner;
+
 
 public class OS {
     private Disk disk;
@@ -66,6 +68,17 @@ public class OS {
                 break;
             default:
                 System.err.println("Unknown command!");
+        }
+    }
+
+    public static void main(String[] args) {
+        OS os = new OS();
+        Scanner sc = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("Enter command");
+            os.executeCommand(sc.nextLine());
+            System.out.println(os.fileSystem.getDirectoryPath());
         }
     }
 }

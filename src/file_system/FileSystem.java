@@ -10,11 +10,13 @@ import java.nio.file.Path;
 public class FileSystem {
     private Directory root;
     private Directory current;
+    private String directoryPath;
     private static final String ROOT_PATH = "root";
 
     public FileSystem(Disk disk) {
         root = new Directory(ROOT_PATH, null);
         current = root;
+        directoryPath = "root>";
         createTree(root, new File(ROOT_PATH), disk);
     }
 
@@ -24,6 +26,10 @@ public class FileSystem {
 
     public Directory getCurrent() {
         return current;
+    }
+
+    public String getDirectoryPath() {
+        return directoryPath;
     }
 
     private void createTree(Directory dir, File root, Disk disk) {
@@ -43,8 +49,10 @@ public class FileSystem {
     }
 
     public void changeDirectory(String name) {
-        if (name.equals("..") && current != root)
+        if (name.equals("..") && current != root) {
             current = current.getParent();
+            updateDirectoryPath(name);
+        }
         else {
             Directory childDir = current.getChildDirectoryByName(name);
 
@@ -52,7 +60,19 @@ public class FileSystem {
                 throw new IllegalArgumentException("Directory " + name + " does not exist!\n");
 
             current = childDir;
+            updateDirectoryPath(name);
         }
+    }
+
+    public void updateDirectoryPath(String name) {
+        StringBuilder sb = new StringBuilder(directoryPath);
+
+        if (name.equals(".."))
+            sb.replace(sb.lastIndexOf("\\"), sb.indexOf(">"), "");
+        else
+            sb.insert(sb.indexOf(">"), "\\" + name);
+
+        directoryPath = sb.toString();
     }
 
     public void makeDirectory(String name) {
