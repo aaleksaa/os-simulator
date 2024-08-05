@@ -4,7 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.layout.Background;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -26,6 +26,16 @@ public class ViewOS extends Application {
         stage.setScene(scene);
         stage.setTitle("OS simulator");
         stage.show();
+
+        ta.setOnKeyPressed(e -> {
+            if (e.getCode().equals(KeyCode.ENTER)) {
+                e.consume();
+                String command = os.getFileSystem().getDirectoryPath() + getCommandFromTextArea();
+                int caretPosition = ta.getCaretPosition();
+                ta.appendText(command);
+                ta.positionCaret(caretPosition + command.length());
+            }
+        });
     }
 
     public void setStyles() {
@@ -39,7 +49,7 @@ public class ViewOS extends Application {
                         "-fx-font-size: 14px; " +
                         "-fx-background-insets: 0; " +
                         "-fx-background-radius: 0; " +
-                        "-fx-border-color: #2D2D2D; " + // Setting border color
+                        "-fx-border-color: #2D2D2D; " +
                         "-fx-border-radius: 0; " +
                         "-fx-border-width: 1;"
         );
@@ -48,4 +58,10 @@ public class ViewOS extends Application {
     public void appendCurrentDir() {
         ta.appendText(os.getFileSystem().getDirectoryPath());
     }
+
+
+    public String getCommandFromTextArea() {
+        return ta.getText().substring(ta.getText().lastIndexOf(">") + 1);
+    }
+
 }

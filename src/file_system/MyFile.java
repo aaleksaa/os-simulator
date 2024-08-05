@@ -53,6 +53,6 @@ public class MyFile {
 
     @Override
     public String toString() {
-        return name;
+        return name + " " + startBlock + " " + requiredBlocks;
     }
 }

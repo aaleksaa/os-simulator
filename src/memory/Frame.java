@@ -40,6 +40,6 @@ public class Frame {
 
     @Override
     public String toString() {
-        return frameNumber;
+        return frameNumber + " " + (page == null ? "[]" : page);
     }
 }

@@ -59,6 +59,15 @@ public class Process {
         }
     }
 
+    public String getNextInstruction(int programCounter) {
+        return code.get(programCounter);
+    }
+
+    @Override
+    public String toString() {
+        return "Process " + name + " (PID = " + pid + ")";
+    }
+
     public int getPid() {
         return pid;
     }
@@ -73,6 +82,10 @@ public class Process {
 
     public int getProgramCounter() {
         return programCounter;
+    }
+
+    public ProcessState getState() {
+        return state;
     }
 
     public List<String> getCode() {
@@ -97,6 +110,10 @@ public class Process {
 
     public boolean isFinished() {
         return state == ProcessState.FINISHED;
+    }
+
+    public boolean isTerminated() {
+        return state == ProcessState.TERMINATED;
     }
 
     public void setState(ProcessState state) {

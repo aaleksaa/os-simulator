@@ -2,6 +2,7 @@ package cpu;
 
 import assembler.Assembler;
 import assembler.Instruction;
+import memory.RAM;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,6 +53,11 @@ public class CPU {
         return null;
     }
 
+    public void terminateProcess() {
+        currentProcess.setState(ProcessState.TERMINATED);
+        saveValuesOfRegisters();
+    }
+
     public String getRegisterAddress(String name) {
         for (Register reg : generalRegisters)
             if (reg.getName().equals(name))
@@ -80,7 +86,7 @@ public class CPU {
     public String printRegisters() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("IR [").append(IR.getStrValue()).append("]\n");
+        sb.append("IR [").append(IR.getStrValue() == null ? "" : IR.getStrValue()).append("]\n");
         sb.append(PC).append("\n");
 
         for (Register reg : generalRegisters)
@@ -118,18 +124,20 @@ public class CPU {
         PC.incrementValue(1);
     }
 
-    public void execute() {
+    public void execute(RAM ram) {
         while (currentProcess.isRunning()) {
-            IR.setStrValue(currentProcess.getCode().get(PC.getValue()));
+            IR.setStrValue(currentProcess.getNextInstruction(PC.getValue()));
             executeMachineCode();
 
             try {
-                Thread.sleep(2000);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+
         }
 
         clearRegisters();
+        ram.remove(currentProcess);
     }
 }

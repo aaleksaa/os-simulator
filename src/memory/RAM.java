@@ -28,6 +28,9 @@ public class RAM {
     }
 
     public RAM(int size, int frameSize) {
+        this.frames = new ArrayList<>();
+        this.freeFrames = new ArrayList<>();
+        this.readyQueue = new LinkedList<>();
         this.size = size;
         this.frameSize = frameSize;
         this.numberOfFrames = size / frameSize;
@@ -36,14 +39,8 @@ public class RAM {
 
     private void init(int n) {
         for (int i = 0; i < n; i++) {
-            String binaryNumber = decToBinary(i);
-            String newBinary = "";
-
-            for (int j = 0; j < powerOfTwo(n) - binaryNumber.length(); j++)
-                newBinary += "0";
-
-            newBinary += binaryNumber;
-            frames.add(new Frame(newBinary));
+            String hexNumber = decToHex(i);
+            frames.add(new Frame(hexNumber));
             freeFrames.add(i);
         }
     }
@@ -68,13 +65,13 @@ public class RAM {
         return freeFrames;
     }
 
-    public void load(Process process) {
+    public void load(Process process) throws IllegalArgumentException {
         List<Page> pages = process.getPages();
         int numberOfPages = pages.size();
         int pageCounter = 0;
 
         if (freeFrames.size() < numberOfPages)
-            throw new IllegalArgumentException("Not enough space for process!");
+            throw new IllegalArgumentException("Not enough space for process!\n" + numberOfPages);
 
         while (pageCounter < numberOfPages) {
             int index = freeFrames.get(0);
@@ -89,40 +86,23 @@ public class RAM {
 
     public void remove(Process process) {
         List<String> pageTable = process.getPageTable();
-        for (int i = 0; i < pageTable.size(); i++) {
-            int index = Integer.parseInt(pageTable.get(i), 2);
+        for (String s : pageTable) {
+            int index = Integer.parseInt(s, 2);
             frames.get(index).free();
             freeFrames.add(index);
         }
     }
 
-    private static String decToBinary(int n) {
-        String binaryNumber = "";
-        int[] binaryNum = new int[1000];
-        int i = 0;
-
-        while (n > 0) {
-            binaryNum[i] = n % 2;
-            n /= 2;
-            i++;
-        }
-
-        for (int j = i - 1; j >= 0; j--)
-            binaryNumber += String.valueOf(binaryNum[j]);
-
-        return binaryNumber;
+    private static String decToHex(int n) {
+        return Integer.toHexString(n).toUpperCase();
     }
+    
+    public String printMemory() {
+        StringBuilder sb = new StringBuilder();
 
+        for (Frame frame : frames)
+            sb.append(frame).append("\n");
 
-    private static int powerOfTwo(int size) {
-        int i = 1;
-        int counter = 0;
-
-        while (i <= size) {
-            i *= 2;
-            counter++;
-        }
-
-        return (i / 2 == size) ? --counter : -1;
+        return sb.toString();
     }
 }

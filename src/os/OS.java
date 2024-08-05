@@ -10,18 +10,18 @@ import java.util.Scanner;
 
 
 public class OS {
-    private Disk disk;
-    private FileSystem fileSystem;
-    private RAM ram;
-    private CPU cpu;
-    private ProcessScheduler scheduler;
+    private final Disk disk;
+    private final FileSystem fileSystem;
+    private final RAM ram;
+    private final CPU cpu;
+    private final ProcessScheduler scheduler;
 
     public OS() {
         this.disk = new Disk();
         this.fileSystem = new FileSystem(disk);
         this.ram = new RAM();
         this.cpu = new CPU();
-        this.scheduler = new ProcessScheduler(cpu);
+        this.scheduler = new ProcessScheduler(cpu, ram);
     }
 
     public Disk getDisk() {
@@ -63,6 +63,21 @@ public class OS {
             case "ren":
                 CommandLine.ren(fileSystem, parts[1], parts[2]);
                 break;
+            case "load":
+                CommandLine.load(scheduler, disk, cpu, ram, parts[1]);
+                break;
+            case "run":
+                CommandLine.run(scheduler);
+                break;
+            case "mem":
+                CommandLine.mem(disk, cpu, ram);
+                break;
+            case "terminate":
+                CommandLine.terminate(cpu);
+                break;
+            case "ps":
+                CommandLine.ps(scheduler);
+                break;
             case "exit":
                 CommandLine.exit();
                 break;
@@ -78,7 +93,6 @@ public class OS {
         while (true) {
             System.out.println("Enter command");
             os.executeCommand(sc.nextLine());
-            System.out.println(os.fileSystem.getDirectoryPath());
         }
     }
 }

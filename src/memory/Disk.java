@@ -111,7 +111,7 @@ public class Disk {
         StringBuilder sb = new StringBuilder("Name Start Length\n");
  
         for (MyFile file : files)
-            sb.append(file.getName()).append(" ").append(file.getStartBlock()).append(" ").append(file.getRequiredBlocks()).append("\n");
+            sb.append(file).append("\n");
  
         return sb.toString();
     }
