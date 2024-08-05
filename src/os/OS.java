@@ -72,9 +72,6 @@ public class OS {
             case "mem":
                 CommandLine.mem(disk, cpu, ram);
                 break;
-            case "terminate":
-                CommandLine.terminate(cpu);
-                break;
             case "ps":
                 CommandLine.ps(scheduler);
                 break;

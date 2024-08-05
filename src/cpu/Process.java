@@ -108,8 +108,20 @@ public class Process {
         return state == ProcessState.RUNNING;
     }
 
+    public void decrementRemainingTime() {
+        this.remainingTime--;
+    }
+
+    public int getRemainingTime() {
+        return remainingTime;
+    }
+
     public boolean isFinished() {
         return state == ProcessState.FINISHED;
+    }
+
+    public boolean isBlocked() {
+        return state == ProcessState.BLOCKED;
     }
 
     public boolean isTerminated() {
@@ -130,5 +142,25 @@ public class Process {
 
     public void setValueOfRegisters(int[] valueOfRegisters) {
         this.valueOfRegisters = Arrays.copyOf(valueOfRegisters, 4);
+    }
+
+    public void block(ProcessScheduler scheduler) {
+        if (isRunning()) {
+            setState(ProcessState.BLOCKED);
+            System.out.println(this + " is blocked.");
+            scheduler.getQueue().remove(this);
+        } else {
+            System.out.println(this + " is not in running state.");
+        }
+    }
+
+    public void unblock(ProcessScheduler scheduler) {
+        if (isBlocked()) {
+            setState(ProcessState.READY);
+            System.out.println(this + " is unblocked.");
+            scheduler.getQueue().add(this);
+        } else {
+            System.out.println(this + " is not blocked.");
+        }
     }
 }

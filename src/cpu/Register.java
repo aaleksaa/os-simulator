@@ -47,6 +47,14 @@ public class Register {
         this.value *= value;
     }
 
+    public String getPartValue(int a, int b) {
+        return strValue.substring(a, b);
+    }
+
+    public String splitInput() {
+        return strValue.length() == 12 ? getPartValue(8, 12) : getPartValue(8, 16);
+    }
+
     @Override
     public String toString() {
         return name + " [" + value + "]";

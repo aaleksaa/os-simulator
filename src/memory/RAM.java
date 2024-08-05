@@ -39,7 +39,7 @@ public class RAM {
 
     private void init(int n) {
         for (int i = 0; i < n; i++) {
-            String hexNumber = decToHex(i);
+            String hexNumber = Integer.toHexString(i).toUpperCase();
             frames.add(new Frame(hexNumber));
             freeFrames.add(i);
         }
@@ -87,16 +87,12 @@ public class RAM {
     public void remove(Process process) {
         List<String> pageTable = process.getPageTable();
         for (String s : pageTable) {
-            int index = Integer.parseInt(s, 2);
+            int index = Integer.parseInt(s, 16);
             frames.get(index).free();
             freeFrames.add(index);
         }
     }
 
-    private static String decToHex(int n) {
-        return Integer.toHexString(n).toUpperCase();
-    }
-    
     public String printMemory() {
         StringBuilder sb = new StringBuilder();
 

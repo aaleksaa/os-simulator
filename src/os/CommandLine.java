@@ -58,10 +58,6 @@ public class CommandLine {
         }
     }
 
-    public static void terminate(CPU cpu) {
-        cpu.terminateProcess();
-    }
-
 
     public static void run(ProcessScheduler scheduler) {
         scheduler.start();

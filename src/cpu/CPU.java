@@ -53,11 +53,6 @@ public class CPU {
         return null;
     }
 
-    public void terminateProcess() {
-        currentProcess.setState(ProcessState.TERMINATED);
-        saveValuesOfRegisters();
-    }
-
     public String getRegisterAddress(String name) {
         for (Register reg : generalRegisters)
             if (reg.getName().equals(name))
@@ -86,42 +81,41 @@ public class CPU {
     public String printRegisters() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("IR [").append(IR.getStrValue() == null ? "" : IR.getStrValue()).append("]\n");
-        sb.append(PC).append("\n");
-
-        for (Register reg : generalRegisters)
-            sb.append(reg).append("\n");
+        sb.append(String.format("%-5s %-5s %-5s %-5s %-20s %-5s", "R1", "R2", "R3", "R4", "IR", "PC")).append("\n");
+        sb.append(String.format("%-5d %-5d %-5d %-5d %-20s %-5d", R1.getValue(), R2.getValue(), R3.getValue(), R4.getValue(), IR.getStrValue(), PC.getValue()));
+        sb.append("\n");
 
         return sb.toString();
     }
 
     private void executeMachineCode() {
-        String instruction = IR.getStrValue().substring(0, 4);
+        String instruction = IR.getPartValue(0, 4);
         System.out.println(printRegisters());
 
         if (instruction.equals(Instruction.HALT.getOperationCode()))
             Assembler.halt(currentProcess);
         else if (instruction.equals(Instruction.ADD.getOperationCode())) {
-            String s1 = IR.getStrValue().substring(4, 8);
-            String s2 = IR.getStrValue().length() == 12 ? IR.getStrValue().substring(8, 12) : IR.getStrValue().substring(8, 16);
+            String s1 = IR.getPartValue(4, 8);
+            String s2 = IR.splitInput();
             Assembler.add(this, s1, s2);
         } else if (instruction.equals(Instruction.SUB.getOperationCode())) {
-            String s1 = IR.getStrValue().substring(4, 8);
-            String s2 = IR.getStrValue().length() == 12 ? IR.getStrValue().substring(8, 12) : IR.getStrValue().substring(8, 16);
+            String s1 = IR.getPartValue(4, 8);
+            String s2 = IR.splitInput();
             Assembler.sub(this, s1, s2);
         } else if (instruction.equals(Instruction.MUL.getOperationCode())) {
-            String s1 = IR.getStrValue().substring(4, 8);
-            String s2 = IR.getStrValue().length() == 12 ? IR.getStrValue().substring(8, 12) : IR.getStrValue().substring(8, 16);
+            String s1 = IR.getPartValue(4, 8);
+            String s2 = IR.splitInput();
             Assembler.mul(this, s1, s2);
         } else if (instruction.equals(Instruction.DEC.getOperationCode())) {
-            String s1 = IR.getStrValue().substring(4, 8);
+            String s1 = IR.getPartValue(4, 8);
             Assembler.dec(this, s1);
         } else if (instruction.equals(Instruction.INC.getOperationCode())) {
-            String s1 = IR.getStrValue().substring(4, 8);
+            String s1 = IR.getPartValue(4, 8);
             Assembler.inc(this, s1);
         }
 
         PC.incrementValue(1);
+        currentProcess.decrementRemainingTime();
     }
 
     public void execute(RAM ram) {
