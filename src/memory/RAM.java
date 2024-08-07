@@ -14,8 +14,6 @@ public class RAM {
     private List<Integer> freeFrames;
     private int frameSize;
     private int numberOfFrames;
-    private Queue<Process> readyQueue;
-    private Process currentProcess;
 
     public RAM() {
         this.size = 4096;
@@ -23,14 +21,12 @@ public class RAM {
         this.numberOfFrames = 128;
         this.frames = new ArrayList<>();
         this.freeFrames = new ArrayList<>();
-        this.readyQueue = new LinkedList<>();
         init(numberOfFrames);
     }
 
     public RAM(int size, int frameSize) {
         this.frames = new ArrayList<>();
         this.freeFrames = new ArrayList<>();
-        this.readyQueue = new LinkedList<>();
         this.size = size;
         this.frameSize = frameSize;
         this.numberOfFrames = size / frameSize;
@@ -80,7 +76,6 @@ public class RAM {
             freeFrames.remove(0);
         }
 
-        readyQueue.add(process);
         process.setState(ProcessState.READY);
     }
 

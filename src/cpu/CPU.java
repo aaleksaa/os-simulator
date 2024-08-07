@@ -47,17 +47,18 @@ public class CPU {
     }
 
     public Register getRegisterByAddress(String address) {
-        for (Register reg : generalRegisters)
-            if (reg.getAddress().equals(address))
-                return reg;
-        return null;
+        return generalRegisters.stream()
+                .filter(r -> r.getAddress().equals(address))
+                .findFirst()
+                .orElse(null);
     }
 
     public String getRegisterAddress(String name) {
-        for (Register reg : generalRegisters)
-            if (reg.getName().equals(name))
-                return reg.getAddress();
-        return null;
+        return generalRegisters.stream()
+                .filter(reg -> reg.getName().equals(name))
+                .map(Register::getAddress)
+                .findFirst()
+                .orElse(null);
     }
 
     public void saveValuesOfRegisters() {
@@ -74,44 +75,40 @@ public class CPU {
     }
 
     public void clearRegisters() {
-        for (Register reg : generalRegisters)
-            reg.setValue(0);
+        generalRegisters.forEach(r -> r.setValue(0));
+        Assembler.accumulator = 0;
     }
 
     public String printRegisters() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(String.format("%-5s %-5s %-5s %-5s %-20s %-5s", "R1", "R2", "R3", "R4", "IR", "PC")).append("\n");
-        sb.append(String.format("%-5d %-5d %-5d %-5d %-20s %-5d", R1.getValue(), R2.getValue(), R3.getValue(), R4.getValue(), IR.getStrValue(), PC.getValue()));
+        sb.append(String.format("%-5s %-5s %-5s %-5s %-20s %-5s %-5s", "R1", "R2", "R3", "R4", "IR", "PC", "ACC")).append("\n");
+        sb.append(String.format("%-5d %-5d %-5d %-5d %-20s %-5d %-5d", R1.getValue(), R2.getValue(), R3.getValue(), R4.getValue(), IR.getStrValue(), PC.getValue(), Assembler.accumulator));
         sb.append("\n");
 
         return sb.toString();
     }
 
     private void executeMachineCode() {
-        String instruction = IR.getPartValue(0, 4);
+        String instruction = IR.getStrValue().substring(0, 4);
         System.out.println(printRegisters());
 
         if (instruction.equals(Instruction.HALT.getOperationCode()))
             Assembler.halt(currentProcess);
         else if (instruction.equals(Instruction.ADD.getOperationCode())) {
-            String s1 = IR.getPartValue(4, 8);
-            String s2 = IR.splitInput();
-            Assembler.add(this, s1, s2);
+            Assembler.add(this, IR.getStrValue().substring(4));
         } else if (instruction.equals(Instruction.SUB.getOperationCode())) {
-            String s1 = IR.getPartValue(4, 8);
-            String s2 = IR.splitInput();
-            Assembler.sub(this, s1, s2);
+            Assembler.sub(this, IR.getStrValue().substring(4));
         } else if (instruction.equals(Instruction.MUL.getOperationCode())) {
-            String s1 = IR.getPartValue(4, 8);
-            String s2 = IR.splitInput();
-            Assembler.mul(this, s1, s2);
+            Assembler.mul(this, IR.getStrValue().substring(4));
         } else if (instruction.equals(Instruction.DEC.getOperationCode())) {
-            String s1 = IR.getPartValue(4, 8);
-            Assembler.dec(this, s1);
+            Assembler.dec();
+        } else if (instruction.equals(Instruction.LOAD.getOperationCode())) {
+            Assembler.load(this, IR.getStrValue().substring(4));
+        } else if (instruction.equals(Instruction.STORE.getOperationCode())) {
+            Assembler.store(this, IR.getStrValue().substring(4));
         } else if (instruction.equals(Instruction.INC.getOperationCode())) {
-            String s1 = IR.getPartValue(4, 8);
-            Assembler.inc(this, s1);
+            Assembler.inc();
         }
 
         PC.incrementValue(1);

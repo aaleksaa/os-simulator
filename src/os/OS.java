@@ -88,7 +88,7 @@ public class OS {
         Scanner sc = new Scanner(System.in);
 
         while (true) {
-            System.out.println("Enter command");
+            System.out.print(os.getFileSystem().getDirectoryPath());
             os.executeCommand(sc.nextLine());
         }
     }

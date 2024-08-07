@@ -1,8 +1,8 @@
 package cpu;
 
 public class Register {
-    private String name;
-    private String address;
+    private final String name;
+    private final String address;
     private String strValue;
     private int value;
 
@@ -37,22 +37,6 @@ public class Register {
 
     public void incrementValue(int value) {
         this.value += value;
-    }
-
-    public void decrementValue(int value) {
-        this.value -= value;
-    }
-
-    public void multipleValue(int value) {
-        this.value *= value;
-    }
-
-    public String getPartValue(int a, int b) {
-        return strValue.substring(a, b);
-    }
-
-    public String splitInput() {
-        return strValue.length() == 12 ? getPartValue(8, 12) : getPartValue(8, 16);
     }
 
     @Override

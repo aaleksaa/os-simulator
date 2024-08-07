@@ -7,6 +7,8 @@ import cpu.Process;
 
 
 public class Assembler {
+    public static int accumulator = 0;
+
     private static int convertBinary(String binaryValue) {
         return Integer.parseInt(binaryValue, 2);
     }
@@ -18,7 +20,7 @@ public class Assembler {
 
     public static String transformAssemblyToMachineCode(CPU cpu, String assemblyInstruction) {
         StringBuilder sb = new StringBuilder();
-        String[] instructionParts = assemblyInstruction.split("[ |,]");
+        String[] instructionParts = assemblyInstruction.split(" ");
 
         Instruction instruction = Instruction.fromString(instructionParts[0]);
         String instructionCode = instruction.getOperationCode();
@@ -26,12 +28,13 @@ public class Assembler {
 
         if (instruction == Instruction.HALT)
             return sb.toString();
-        else if (instruction == Instruction.INC || instruction == Instruction.DEC)
-            sb.append(cpu.getRegisterAddress(instructionParts[1]));
-        else if (cpu.getRegisterAddress(instructionParts[2]) != null)
-            sb.append(cpu.getRegisterAddress(instructionParts[1])).append(cpu.getRegisterAddress(instructionParts[2]));
-        else
-            sb.append(cpu.getRegisterAddress(instructionParts[1])).append(toBinary(instructionParts[2]));
+        else {
+            String address = cpu.getRegisterAddress(instructionParts[1]);
+            if (address == null)
+               sb.append(toBinary(instructionParts[1]));
+            else
+                sb.append(address);
+        }
 
         return sb.toString();
     }
@@ -40,46 +43,45 @@ public class Assembler {
         process.setState(ProcessState.FINISHED);
     }
 
-    public static void mov(CPU cpu, String address1, String address2) {
-        Register reg1 = cpu.getRegisterByAddress(address1);
-        Register reg2 = cpu.getRegisterByAddress(address2);
-        reg1.setValue(reg2.getValue());
-    }
-
-    public static void add(CPU cpu, String address, String input) {
-        Register reg = cpu.getRegisterByAddress(address);
-
+    public static void load(CPU cpu, String input) {
         if (input.length() == 8)
-            reg.incrementValue(convertBinary(input));
+            accumulator = convertBinary(input);
         else
-            reg.incrementValue(cpu.getRegisterByAddress(input).getValue());
+            accumulator = cpu.getRegisterByAddress(input).getValue();
     }
 
-    public static void sub(CPU cpu, String address, String input) {
+    public static void store(CPU cpu, String address) {
         Register reg = cpu.getRegisterByAddress(address);
+        reg.setValue(accumulator);
+    }
 
+
+    public static void add(CPU cpu, String input) {
         if (input.length() == 8)
-            reg.decrementValue(convertBinary(input));
+            accumulator += convertBinary(input);
         else
-            reg.decrementValue(cpu.getRegisterByAddress(input).getValue());
+            accumulator += cpu.getRegisterByAddress(input).getValue();
     }
 
-    public static void mul(CPU cpu, String address, String input) {
-        Register reg = cpu.getRegisterByAddress(address);
-
+    public static void sub(CPU cpu, String input) {
         if (input.length() == 8)
-            reg.multipleValue(convertBinary(input));
+            accumulator -= convertBinary(input);
         else
-            reg.multipleValue(cpu.getRegisterByAddress(input).getValue());
+            accumulator -= cpu.getRegisterByAddress(input).getValue();
     }
 
-    public static void inc(CPU cpu, String address) {
-        Register reg = cpu.getRegisterByAddress(address);
-        reg.incrementValue(1);
+    public static void mul(CPU cpu, String input) {
+        if (input.length() == 8)
+            accumulator *= convertBinary(input);
+        else
+            accumulator *= cpu.getRegisterByAddress(input).getValue();
     }
 
-    public static void dec(CPU cpu, String address) {
-        Register reg = cpu.getRegisterByAddress(address);
-        reg.decrementValue(1);
+    public static void inc() {
+        accumulator++;
+    }
+
+    public static void dec() {
+        accumulator--;
     }
 }

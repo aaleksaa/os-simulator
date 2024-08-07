@@ -57,7 +57,7 @@ public class CommandLine {
             System.out.println(ram.printMemory());
         }
     }
-
+    
 
     public static void run(ProcessScheduler scheduler) {
         scheduler.start();
