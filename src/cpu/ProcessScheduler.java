@@ -9,6 +9,7 @@ public class ProcessScheduler extends Thread {
     private RAM ram;
     private PriorityQueue<Process> queue;
     private int numberOfProcesses;
+    private Process currentProcess;
 
     public ProcessScheduler(CPU cpu, RAM ram) {
         this.cpu = cpu;
@@ -24,6 +25,14 @@ public class ProcessScheduler extends Thread {
         return numberOfProcesses;
     }
 
+    public void setCurrentProcess(Process currentProcess) {
+        this.currentProcess = currentProcess;
+    }
+
+    public Process getCurrentProcess() {
+        return currentProcess;
+    }
+
     public void addProcess(Process process) {
         queue.add(process);
         numberOfProcesses++;
@@ -33,10 +42,11 @@ public class ProcessScheduler extends Thread {
     public void run() {
         while (!queue.isEmpty()) {
             Process process = queue.peek();
-            runProcess(process);
+            currentProcess = process;
+            runProcess(currentProcess);
 
 
-            if (process.isFinished())
+            if (process.checkState(ProcessState.FINISHED))
                 queue.remove(process);
         }
     }
@@ -51,18 +61,16 @@ public class ProcessScheduler extends Thread {
     }
 
     private void runProcess(Process process) {
-        cpu.setCurrentProcess(process);
-
         if (process.getProgramCounter() == -1) {
             System.out.println(process + " started execution.");
             cpu.getPC().setValue(0);
             process.setState(ProcessState.RUNNING);
-            cpu.execute(ram);
+            cpu.execute(ram, currentProcess);
         } else {
             System.out.println(process + " continued execution.");
-            cpu.loadValuesOfRegisters();
+            cpu.loadValuesOfRegisters(currentProcess);
             process.setState(ProcessState.RUNNING);
-            cpu.execute(ram);
+            cpu.execute(ram, currentProcess);
         }
     }
 }

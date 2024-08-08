@@ -79,6 +79,14 @@ public class RAM {
         process.setState(ProcessState.READY);
     }
 
+    public String getInstruction(String frameNumber, int pageIndex) {
+        int frameIndex = Integer.parseInt(frameNumber, 16);
+        Frame frame = frames.get(frameIndex);
+        Page page = frame.getPage();
+
+        return page.getContent().get(pageIndex);
+    }
+
     public void remove(Process process) {
         List<String> pageTable = process.getPageTable();
         for (String s : pageTable) {

@@ -11,7 +11,6 @@ import java.util.List;
 public class CPU {
     private Register R1, R2, R3, R4, PC, IR;
     private List<Register> generalRegisters;
-    private Process currentProcess;
 
     public CPU() {
         this.generalRegisters = new ArrayList<>();
@@ -38,14 +37,6 @@ public class CPU {
         return generalRegisters;
     }
 
-    public Process getCurrentProcess() {
-        return currentProcess;
-    }
-
-    public void setCurrentProcess(Process currentProcess) {
-        this.currentProcess = currentProcess;
-    }
-
     public Register getRegisterByAddress(String address) {
         return generalRegisters.stream()
                 .filter(r -> r.getAddress().equals(address))
@@ -61,17 +52,17 @@ public class CPU {
                 .orElse(null);
     }
 
-    public void saveValuesOfRegisters() {
+    public void saveValuesOfRegisters(Process process) {
         int[] values = {R1.getValue(), R2.getValue(), R3.getValue(), R4.getValue()};
-        currentProcess.setValueOfRegisters(values);
-        currentProcess.setProgramCounter(PC.getValue());
+        process.setValueOfRegisters(values);
+        process.setProgramCounter(PC.getValue());
     }
 
-    public void loadValuesOfRegisters() {
-        int[] registers = currentProcess.getValueOfRegisters();
+    public void loadValuesOfRegisters(Process process) {
+        int[] registers = process.getValueOfRegisters();
         for (int i = 0; i < registers.length; i++)
             generalRegisters.get(i).setValue(registers[i]);
-        PC.setValue(currentProcess.getProgramCounter());
+        PC.setValue(process.getProgramCounter());
     }
 
     public void clearRegisters() {
@@ -89,36 +80,58 @@ public class CPU {
         return sb.toString();
     }
 
-    private void executeMachineCode() {
+    private void executeMachineCode(Process process) {
         String instruction = IR.getStrValue().substring(0, 4);
         System.out.println(printRegisters());
 
-        if (instruction.equals(Instruction.HALT.getOperationCode()))
-            Assembler.halt(currentProcess);
-        else if (instruction.equals(Instruction.ADD.getOperationCode())) {
-            Assembler.add(this, IR.getStrValue().substring(4));
-        } else if (instruction.equals(Instruction.SUB.getOperationCode())) {
-            Assembler.sub(this, IR.getStrValue().substring(4));
-        } else if (instruction.equals(Instruction.MUL.getOperationCode())) {
-            Assembler.mul(this, IR.getStrValue().substring(4));
-        } else if (instruction.equals(Instruction.DEC.getOperationCode())) {
-            Assembler.dec();
-        } else if (instruction.equals(Instruction.LOAD.getOperationCode())) {
-            Assembler.load(this, IR.getStrValue().substring(4));
-        } else if (instruction.equals(Instruction.STORE.getOperationCode())) {
-            Assembler.store(this, IR.getStrValue().substring(4));
-        } else if (instruction.equals(Instruction.INC.getOperationCode())) {
-            Assembler.inc();
+        switch (instruction) {
+            case "0000":
+                Assembler.halt(process);
+                break;
+            case "0001":
+                Assembler.load(this, IR.getStrValue().substring(4));
+                break;
+            case "0010":
+                Assembler.store(this, IR.getStrValue().substring(4));
+                break;
+            case "0011":
+                Assembler.add(this, IR.getStrValue().substring(4));
+                break;
+            case "0100":
+                Assembler.sub(this, IR.getStrValue().substring(4));
+                break;
+            case "0101":
+                Assembler.mul(this, IR.getStrValue().substring(4));
+                break;
+            case "0110":
+                Assembler.inc();
+                break;
+            case "0111":
+                Assembler.dec();
+                break;
         }
 
         PC.incrementValue(1);
-        currentProcess.decrementRemainingTime();
+        process.decrementRemainingTime();
     }
 
-    public void execute(RAM ram) {
-        while (currentProcess.isRunning()) {
-            IR.setStrValue(currentProcess.getNextInstruction(PC.getValue()));
-            executeMachineCode();
+    public void execute(RAM ram, Process process) {
+        List<String> pageTable = process.getPageTable();
+        int numOfPagesInFrame = ram.getFrameSize() / 16;
+        int frameIndex = 0;
+        int index = 0;
+
+        while (process.checkState(ProcessState.RUNNING)) {
+            String instruction = ram.getInstruction(pageTable.get(frameIndex), index);
+            index++;
+
+            if (index == numOfPagesInFrame) {
+                index = 0;
+                frameIndex++;
+            }
+
+            IR.setStrValue(instruction);
+            executeMachineCode(process);
 
             try {
                 Thread.sleep(3000);
@@ -129,6 +142,6 @@ public class CPU {
         }
 
         clearRegisters();
-        ram.remove(currentProcess);
+        ram.remove(process);
     }
 }

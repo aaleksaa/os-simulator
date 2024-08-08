@@ -1,7 +1,7 @@
 package memory;
 
 public class Frame {
-    private String frameNumber;
+    private final String frameNumber;
     private boolean allocated;
     private int bytesAllocated;
     private Page page;

@@ -17,7 +17,6 @@ public class Process {
     private ProcessState state;
     private List<Page> pages;
     private List<String> pageTable;
-    private List<String> code;
     private int[] valueOfRegisters = new int[4];
     private int programCounter = -1;
     public final static Comparator<Process> compareRT = (o1, o2) -> Integer.compare(o1.remainingTime, o2.remainingTime);
@@ -27,21 +26,14 @@ public class Process {
         this.name = name;
         this.pages = new ArrayList<>();
         this.pageTable = new ArrayList<>();
-        this.code = new ArrayList<>();
-        readFile(name, disk, cpu);
-        splitPages(ram);
-        this.state = ProcessState.READY;
+        splitPages(name, disk, cpu, ram);
+    }
+
+    private void splitPages(String name, Disk disk, CPU cpu, RAM ram) {
+        List<String> code = disk.getFileByName(name).getContent();
+        code.replaceAll(assemblyInstruction -> Assembler.transformAssemblyToMachineCode(cpu, assemblyInstruction));
         this.remainingTime = code.size();
-    }
 
-    private void readFile(String name, Disk disk, CPU cpu) {
-        List<String> content = disk.getFileByName(name).getContent();
-
-        for (String line : content)
-            code.add(Assembler.transformAssemblyToMachineCode(cpu, line));
-    }
-
-    private void splitPages(RAM ram) {
         int frameSize = ram.getFrameSize();
         int number = frameSize / 16;
         int counter = 0;
@@ -59,9 +51,6 @@ public class Process {
         }
     }
 
-    public String getNextInstruction(int programCounter) {
-        return code.get(programCounter);
-    }
 
     @Override
     public String toString() {
@@ -88,10 +77,6 @@ public class Process {
         return state;
     }
 
-    public List<String> getCode() {
-        return code;
-    }
-
     public List<Page> getPages() {
         return pages;
     }
@@ -100,12 +85,8 @@ public class Process {
         return pageTable;
     }
 
-    public boolean isReady() {
-        return state == ProcessState.READY;
-    }
-
-    public boolean isRunning() {
-        return state == ProcessState.RUNNING;
+    public boolean checkState(ProcessState state) {
+        return this.state == state;
     }
 
     public void decrementRemainingTime() {
@@ -114,18 +95,6 @@ public class Process {
 
     public int getRemainingTime() {
         return remainingTime;
-    }
-
-    public boolean isFinished() {
-        return state == ProcessState.FINISHED;
-    }
-
-    public boolean isBlocked() {
-        return state == ProcessState.BLOCKED;
-    }
-
-    public boolean isTerminated() {
-        return state == ProcessState.TERMINATED;
     }
 
     public void setState(ProcessState state) {
@@ -145,7 +114,7 @@ public class Process {
     }
 
     public void block(ProcessScheduler scheduler) {
-        if (isRunning()) {
+        if (checkState(ProcessState.RUNNING)) {
             setState(ProcessState.BLOCKED);
             System.out.println(this + " is blocked.");
             scheduler.getQueue().remove(this);
@@ -155,7 +124,7 @@ public class Process {
     }
 
     public void unblock(ProcessScheduler scheduler) {
-        if (isBlocked()) {
+        if (checkState(ProcessState.BLOCKED)) {
             setState(ProcessState.READY);
             System.out.println(this + " is unblocked.");
             scheduler.getQueue().add(this);
