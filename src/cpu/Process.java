@@ -18,7 +18,7 @@ public class Process {
     private ProcessState state;
     private List<Page> pages;
     private List<String> pageTable;
-    private int[] valueOfRegisters = new int[4];
+    private int[] valueOfRegisters = new int[5];
     private int programCounter = -1;
     public final static Comparator<Process> compareRT = (o1, o2) -> Integer.compare(o1.remainingTime, o2.remainingTime);
 
@@ -119,7 +119,7 @@ public class Process {
         if (checkState(ProcessState.RUNNING)) {
             setState(ProcessState.BLOCKED);
             System.out.println(this + " is blocked.");
-            scheduler.getQueue().remove(this);
+            scheduler.getReadyQueue().remove(this);
         } else {
             System.out.println(this + " is not in running state.");
         }
@@ -129,7 +129,7 @@ public class Process {
         if (checkState(ProcessState.BLOCKED)) {
             setState(ProcessState.READY);
             System.out.println(this + " is unblocked.");
-            scheduler.getQueue().add(this);
+            scheduler.getReadyQueue().add(this);
         } else {
             System.out.println(this + " is not blocked.");
         }

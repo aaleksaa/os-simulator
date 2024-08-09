@@ -2,31 +2,26 @@ package cpu;
 
 import memory.RAM;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 
 public class ProcessScheduler extends Thread {
     private CPU cpu;
     private RAM ram;
-    private PriorityQueue<Process> queue;
+    private PriorityQueue<Process> readyQueue;
+    private Queue<Process> waitingQueue;
     private List<Process> processes;
-    private int numberOfProcesses;
     private Process currentProcess;
 
     public ProcessScheduler(CPU cpu, RAM ram) {
         this.cpu = cpu;
         this.ram = ram;
-        this.queue = new PriorityQueue<>(Process.compareRT);
+        this.readyQueue = new PriorityQueue<>(Process.compareRT);
+        this.waitingQueue = new LinkedList<>();
         this.processes = new ArrayList<>();
     }
 
-    public PriorityQueue<Process> getQueue() {
-        return queue;
-    }
-
-    public int getNumberOfProcesses() {
-        return numberOfProcesses;
+    public PriorityQueue<Process> getReadyQueue() {
+        return readyQueue;
     }
 
     public void setCurrentProcess(Process currentProcess) {
@@ -38,21 +33,29 @@ public class ProcessScheduler extends Thread {
     }
 
     public void addProcess(Process process) {
-        queue.add(process);
+        readyQueue.add(process);
         processes.add(process);
-        numberOfProcesses++;
+    }
+
+    public int getNextPid() {
+        return processes.size();
     }
 
     @Override
     public void run() {
-        while (!queue.isEmpty()) {
-            Process process = queue.peek();
+        while (!readyQueue.isEmpty() || !waitingQueue.isEmpty()) {
+            Process process = !readyQueue.isEmpty() ? readyQueue.poll() : waitingQueue.poll();
+
             currentProcess = process;
             runProcess(currentProcess);
 
+            if (!currentProcess.checkState(ProcessState.FINISHED))
+                waitingQueue.add(process);
 
-            if (process.checkState(ProcessState.FINISHED))
-                queue.remove(process);
+            if (readyQueue.isEmpty() && !waitingQueue.isEmpty()) {
+                readyQueue.addAll(waitingQueue);
+                waitingQueue.clear();
+            }
         }
     }
 
@@ -73,13 +76,11 @@ public class ProcessScheduler extends Thread {
             cpu.getPC().setValue(0);
             process.setState(ProcessState.RUNNING);
             cpu.execute(ram, currentProcess);
-            System.out.println(process.getName() + " (PID = " + process.getPid() + ") finished execution.");
         } else {
             System.out.println(process.getName() + " (PID = " + process.getPid() + ") continued execution.");
             cpu.loadValuesOfRegisters(currentProcess);
             process.setState(ProcessState.RUNNING);
             cpu.execute(ram, currentProcess);
-            System.out.println(process.getName() + " (PID = " + process.getPid() + ") finished execution.");
         }
     }
 }

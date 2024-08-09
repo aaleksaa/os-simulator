@@ -48,10 +48,10 @@ public class CommandLine {
 
     public static void load(ProcessScheduler scheduler, Disk disk, CPU cpu, RAM ram, String file) {
         try {
-            Process process = new Process(scheduler.getNumberOfProcesses(), file, disk, cpu, ram);
+            Process process = new Process(scheduler.getNextPid(), file, disk, cpu, ram);
             scheduler.addProcess(process);
             ram.load(process);
-            System.out.println("Process " + file + " is loaded!");
+            System.out.println("Process " + process.getName() + " is loaded!");
         } catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
             System.out.println(ram.printMemory());

@@ -1,7 +1,6 @@
 package cpu;
 
 import assembler.Assembler;
-import assembler.Instruction;
 import memory.RAM;
 
 import java.util.ArrayList;
@@ -11,6 +10,7 @@ import java.util.List;
 public class CPU {
     private Register R1, R2, R3, R4, PC, IR;
     private List<Register> generalRegisters;
+    private static final int TIME_QUANTUM = 2;
 
     public CPU() {
         this.generalRegisters = new ArrayList<>();
@@ -53,16 +53,19 @@ public class CPU {
     }
 
     public void saveValuesOfRegisters(Process process) {
-        int[] values = {R1.getValue(), R2.getValue(), R3.getValue(), R4.getValue()};
+        int[] values = {R1.getValue(), R2.getValue(), R3.getValue(), R4.getValue(), Assembler.accumulator};
         process.setValueOfRegisters(values);
         process.setProgramCounter(PC.getValue());
     }
 
     public void loadValuesOfRegisters(Process process) {
         int[] registers = process.getValueOfRegisters();
-        for (int i = 0; i < registers.length; i++)
+
+        for (int i = 0; i < registers.length - 1; i++)
             generalRegisters.get(i).setValue(registers[i]);
+
         PC.setValue(process.getProgramCounter());
+        Assembler.accumulator = registers[registers.length - 1];
     }
 
     public void clearRegisters() {
@@ -82,7 +85,6 @@ public class CPU {
 
     private void executeMachineCode(Process process) {
         String instruction = IR.getStrValue().substring(0, 4);
-        System.out.println(printRegisters());
 
         switch (instruction) {
             case "0000":
@@ -111,24 +113,27 @@ public class CPU {
                 break;
         }
 
-        PC.incrementValue(1);
+        System.out.println(printRegisters());
         process.decrementRemainingTime();
+        PC.incrementValue(1);
     }
 
     public void execute(RAM ram, Process process) {
+        if (process.getProgramCounter() != -1)
+            loadValuesOfRegisters(process);
+        else
+            clearRegisters();
+
         List<String> pageTable = process.getPageTable();
-        int numOfPagesInFrame = ram.getFrameSize() / 16;
-        int frameIndex = 0;
-        int index = 0;
 
-        while (process.checkState(ProcessState.RUNNING)) {
+
+        for (int i = 0; i < TIME_QUANTUM; i++) {
+            if (process.checkState(ProcessState.FINISHED))
+                break;
+
+            int frameIndex = PC.getValue() / 2;
+            int index = PC.getValue() % 2;
             String instruction = ram.getInstruction(pageTable.get(frameIndex), index);
-            index++;
-
-            if (index == numOfPagesInFrame) {
-                index = 0;
-                frameIndex++;
-            }
 
             IR.setStrValue(instruction);
             executeMachineCode(process);
@@ -138,10 +143,9 @@ public class CPU {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-
         }
 
-        clearRegisters();
-        ram.remove(process);
+        if (!process.checkState(ProcessState.FINISHED))
+            saveValuesOfRegisters(process);
     }
 }
