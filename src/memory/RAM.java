@@ -79,6 +79,10 @@ public class RAM {
         process.setState(ProcessState.READY);
     }
 
+    public int getBytesAllocated() {
+        return frames.stream().filter(Frame::isAllocated).mapToInt(Frame::getBytesAllocated).sum();
+    }
+
     public String getInstruction(String frameNumber, int pageIndex) {
         int frameIndex = Integer.parseInt(frameNumber, 16);
         Frame frame = frames.get(frameIndex);
@@ -99,8 +103,14 @@ public class RAM {
     public String printMemory() {
         StringBuilder sb = new StringBuilder();
 
+        sb.append("------------------------------------------------------------------------\n");
+        sb.append(String.format("%-20s %-20s %-20s%n", "TOTAL", "USED", "FREE"));
+        sb.append(String.format("%-20s %-20s %-20s%n", size, getBytesAllocated(), (size - getBytesAllocated())));
+        sb.append("------------------------------------------------------------------------\n");
+
         for (Frame frame : frames)
-            sb.append(frame).append("\n");
+            if (frame.isAllocated())
+                sb.append(frame).append("\n");
 
         return sb.toString();
     }

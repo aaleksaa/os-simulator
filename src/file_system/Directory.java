@@ -97,7 +97,7 @@ public class Directory implements Comparable<Directory> {
             return "Current directory " + name + " is empty!";
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Current directory ").append(name).append("\n");
+        sb.append("Content of ").append(name).append("\n");
         sb.append("Type").append("\t\t").append("Name").append("\n");
 
         for (Directory dir : directories)

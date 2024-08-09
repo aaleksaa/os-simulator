@@ -56,7 +56,7 @@ public class ViewOS extends Application {
         ta.setStyle(
                 "-fx-control-inner-background: #2D2D2D; " +
                         "-fx-text-fill: #FFFFFF; " +
-                        "-fx-font-size: 14px; " +
+                        "-fx-font-size: 16px; " +
                         "-fx-background-radius: 0; " +
                         "-fx-border-color: #FFFFFF; " +
                         "-fx-border-radius: 0; " +

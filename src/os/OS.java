@@ -70,7 +70,7 @@ public class OS {
                 CommandLine.run(scheduler);
                 break;
             case "mem":
-                CommandLine.mem(disk, cpu, ram);
+                CommandLine.mem(ram);
                 break;
             case "ps":
                 CommandLine.ps(scheduler);
@@ -78,18 +78,11 @@ public class OS {
             case "exit":
                 CommandLine.exit();
                 break;
+            case "help":
+                CommandLine.help();
+                break;
             default:
                 System.err.println("Unknown command!");
-        }
-    }
-
-    public static void main(String[] args) {
-        OS os = new OS();
-        Scanner sc = new Scanner(System.in);
-
-        while (true) {
-            System.out.print(os.getFileSystem().getDirectoryPath());
-            os.executeCommand(sc.nextLine());
         }
     }
 }

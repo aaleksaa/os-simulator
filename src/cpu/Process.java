@@ -14,6 +14,7 @@ public class Process {
     private final int pid;
     private final String name;
     private int remainingTime;
+    private int size;
     private ProcessState state;
     private List<Page> pages;
     private List<String> pageTable;
@@ -23,10 +24,11 @@ public class Process {
 
     public Process(int id, String name, Disk disk, CPU cpu, RAM ram) {
         this.pid = id;
-        this.name = name;
+        this.name = name.substring(0, name.lastIndexOf('.'));
         this.pages = new ArrayList<>();
         this.pageTable = new ArrayList<>();
         splitPages(name, disk, cpu, ram);
+        this.size = pages.stream().mapToInt(Page::getSize).sum();
     }
 
     private void splitPages(String name, Disk disk, CPU cpu, RAM ram) {
@@ -54,7 +56,7 @@ public class Process {
 
     @Override
     public String toString() {
-        return "Process " + name + " (PID = " + pid + ")";
+        return String.format("%-3s\t\t %-18s\t\t %-10s\t %-10s\n", pid, name, state, size);
     }
 
     public int getPid() {
