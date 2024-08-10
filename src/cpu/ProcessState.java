@@ -1,5 +1,5 @@
 package cpu;
 
 public enum ProcessState {
-    READY, RUNNING, TERMINATED, BLOCKED, FINISHED;
+    READY, RUNNING, BLOCKED, FINISHED;
 }

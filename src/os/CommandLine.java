@@ -71,6 +71,24 @@ public class CommandLine {
         System.out.println(scheduler.printProcesses());
     }
 
+    public static void block(ProcessScheduler scheduler, int pid) {
+        Process process = scheduler.getProcessByPID(pid);
+
+        if (process == null)
+            System.err.println("Process with (PID = " + pid + ") doesn't exist!");
+        else
+            process.block();
+    }
+
+    public static void unblock(ProcessScheduler scheduler, int pid) {
+        Process process = scheduler.getProcessByPID(pid);
+
+        if (process == null)
+            System.err.println("Process with (PID = " + pid + ") doesn't exist!");
+        else
+            process.unblock();
+    }
+
     public static void exit() {
         System.exit(0);
     }

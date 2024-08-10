@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class FileSystem {
     private Directory root;
@@ -76,7 +77,15 @@ public class FileSystem {
     }
 
     public void makeDirectory(String name) {
-        current.addChildDirectory(new Directory(name, current));
+        Directory dir = new Directory(name, current);
+        current.addChildDirectory(dir);
+        Path path = Paths.get(dir.getAbsolutePath());
+
+        try {
+            Files.createDirectory(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

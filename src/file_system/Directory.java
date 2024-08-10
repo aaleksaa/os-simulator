@@ -2,6 +2,8 @@ package file_system;
 
 import memory.Disk;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class Directory implements Comparable<Directory> {
@@ -136,6 +138,14 @@ public class Directory implements Comparable<Directory> {
             if (file.getName().equals(name))
                 return file;
         return null;
+    }
+
+    public Path toPath() {
+        return parent == null ? Paths.get(name) : parent.toPath().resolve(name);
+    }
+
+    public String getAbsolutePath() {
+        return toPath().toAbsolutePath().toString();
     }
 
     public void removeChildFile(MyFile file, Disk disk) {

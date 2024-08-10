@@ -38,7 +38,11 @@ public class ProcessScheduler extends Thread {
     }
 
     public int getNextPid() {
-        return processes.size();
+        return processes.size() + 1;
+    }
+
+    public Process getProcessByPID(int pid) {
+        return processes.stream().filter(p -> p.getPid() == pid).findFirst().orElse(null);
     }
 
     @Override
@@ -47,14 +51,18 @@ public class ProcessScheduler extends Thread {
             Process process = !readyQueue.isEmpty() ? readyQueue.poll() : waitingQueue.poll();
 
             currentProcess = process;
-            runProcess(currentProcess);
+            if (currentProcess.checkState(ProcessState.BLOCKED))
+                waitingQueue.add(currentProcess);
+            else {
+                runProcess(currentProcess);
 
-            if (!currentProcess.checkState(ProcessState.FINISHED))
-                waitingQueue.add(process);
+                if (!currentProcess.checkState(ProcessState.FINISHED))
+                    waitingQueue.add(process);
 
-            if (readyQueue.isEmpty() && !waitingQueue.isEmpty()) {
-                readyQueue.addAll(waitingQueue);
-                waitingQueue.clear();
+                if (readyQueue.isEmpty() && !waitingQueue.isEmpty()) {
+                    readyQueue.addAll(waitingQueue);
+                    waitingQueue.clear();
+                }
             }
         }
     }

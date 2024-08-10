@@ -81,6 +81,12 @@ public class OS {
             case "help":
                 CommandLine.help();
                 break;
+            case "block":
+                CommandLine.block(scheduler, Integer.parseInt(parts[1]));
+                break;
+            case "unblock":
+                CommandLine.unblock(scheduler, Integer.parseInt(parts[1]));
+                break;
             default:
                 System.err.println("Unknown command!");
         }

@@ -115,23 +115,21 @@ public class Process {
         this.valueOfRegisters = Arrays.copyOf(valueOfRegisters, 4);
     }
 
-    public void block(ProcessScheduler scheduler) {
+    public void block() {
         if (checkState(ProcessState.RUNNING)) {
             setState(ProcessState.BLOCKED);
-            System.out.println(this + " is blocked.");
-            scheduler.getReadyQueue().remove(this);
+            System.out.println(name + " is blocked.");
         } else {
-            System.out.println(this + " is not in running state.");
+            System.out.println(name + " is not in running state.");
         }
     }
 
-    public void unblock(ProcessScheduler scheduler) {
+    public void unblock() {
         if (checkState(ProcessState.BLOCKED)) {
             setState(ProcessState.READY);
-            System.out.println(this + " is unblocked.");
-            scheduler.getReadyQueue().add(this);
+            System.out.println(name + " is unblocked.");
         } else {
-            System.out.println(this + " is not blocked.");
+            System.out.println(name + " is not blocked.");
         }
     }
 }
