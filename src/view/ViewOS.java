@@ -1,32 +1,33 @@
-package os;
+package view;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import os.OS;
 
 import java.io.PrintStream;
 
 public class ViewOS extends Application {
     private final OS os = new OS();
     private final TextArea ta = new TextArea();
+    private final TextField tf = new TextField();
     private final Label lblTitle = new Label("OS simulator [Version 1.0]");
     private final Label lblAuthor = new Label("Created by [Luka Nežić, Aleksa Aćić]");
     private final VBox vbLabels = new VBox(lblTitle, lblAuthor);
-    private final VBox root = new VBox(10, vbLabels, ta);
+    private final VBox root = new VBox(10, vbLabels, ta, tf);
     private final PrintStream out = new PrintStream(new TextAreaOutputStream(ta));
 
     @Override
     public void start(Stage stage) throws Exception {
         Scene scene = new Scene(root, 900, 500);
         setStyles();
-        appendCurrentDir();
 
         stage.setScene(scene);
         stage.setTitle("OS simulator");
@@ -34,15 +35,14 @@ public class ViewOS extends Application {
 
         System.setOut(out);
         System.setErr(out);
+        System.out.println("Type \"help\" for list of commands!");
 
-        ta.setOnKeyPressed(e -> {
+        tf.setOnKeyPressed(e -> {
             if (e.getCode().equals(KeyCode.ENTER)) {
-                e.consume();
-                String command = os.getFileSystem().getDirectoryPath() + getCommandFromTextArea();
-                os.executeCommand(getCommandFromTextArea());
-                int caretPosition = ta.getCaretPosition();
-                appendCurrentDir();
-                ta.positionCaret(caretPosition + command.length());
+                String command = tf.getText().trim();
+                System.out.println("> " + command);
+                os.executeCommand(command);
+                tf.clear();
             }
         });
     }
@@ -53,6 +53,7 @@ public class ViewOS extends Application {
         root.setPadding(new Insets(20));
         lblTitle.setStyle("-fx-text-fill: #FFFFFF; -fx-font-size: 14px; -fx-font-weight: bold");
         lblAuthor.setStyle("-fx-text-fill: #FFFFFF; -fx-font-size: 14px; -fx-font-weight: bold");
+        ta.setEditable(false);
         ta.setStyle(
                 "-fx-control-inner-background: #2D2D2D; " +
                         "-fx-text-fill: #FFFFFF; " +
@@ -62,13 +63,14 @@ public class ViewOS extends Application {
                         "-fx-border-radius: 0; " +
                         "-fx-border-width: 1;"
         );
-    }
-
-    public void appendCurrentDir() {
-        Platform.runLater(() -> ta.appendText(os.getFileSystem().getDirectoryPath()));
-    }
-    
-    public String getCommandFromTextArea() {
-        return ta.getText().substring(ta.getText().lastIndexOf(">") + 1).trim();
+        tf.setStyle(
+                "-fx-control-inner-background: #2D2D2D; " +
+                        "-fx-text-fill: #FFFFFF; " +
+                        "-fx-font-size: 16px; " +
+                        "-fx-background-radius: 0; " +
+                        "-fx-border-color: #FFFFFF; " +
+                        "-fx-border-radius: 0; " +
+                        "-fx-border-width: 1;"
+        );
     }
 }
