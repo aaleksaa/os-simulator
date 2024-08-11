@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class Directory implements Comparable<Directory> {
+public class Directory {
     private String name;
     private Directory parent;
     private List<Directory> directories;
@@ -109,11 +109,6 @@ public class Directory implements Comparable<Directory> {
             sb.append("File").append("\t\t").append(file).append("\n");
 
         return sb.toString();
-    }
-
-    @Override
-    public int compareTo(Directory o) {
-        return name.compareTo(o.name);
     }
 
     @Override

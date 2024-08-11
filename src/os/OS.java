@@ -20,7 +20,7 @@ public class OS {
         this.disk = new Disk();
         this.fileSystem = new FileSystem(disk);
         this.ram = new RAM();
-        this.cpu = new CPU();
+        this.cpu = new CPU(fileSystem);
         this.scheduler = new ProcessScheduler(cpu, ram);
     }
 
@@ -58,7 +58,7 @@ public class OS {
                 CommandLine.dir(fileSystem);
                 break;
             case "rm":
-                CommandLine.rm(fileSystem, disk, parts[1]);
+                CommandLine.rm(fileSystem, parts[1]);
                 break;
             case "ren":
                 CommandLine.ren(fileSystem, parts[1], parts[2]);
@@ -70,7 +70,7 @@ public class OS {
                 CommandLine.run(scheduler);
                 break;
             case "mem":
-                CommandLine.mem(ram);
+                CommandLine.mem(parts[1], ram, disk);
                 break;
             case "ps":
                 CommandLine.ps(scheduler);

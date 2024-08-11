@@ -1,0 +1,5 @@
+Results of suma.asm
+R1 [7]
+R2 [31]
+R3 [41]
+R4 [26]

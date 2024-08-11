@@ -1,8 +1,10 @@
 package cpu;
 
 import assembler.Assembler;
+import file_system.FileSystem;
 import memory.RAM;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,9 +13,12 @@ public class CPU {
     private Register R1, R2, R3, R4, PC, IR;
     private List<Register> generalRegisters;
     private static final int TIME_QUANTUM = 2;
+    private FileSystem fileSystem;
 
-    public CPU() {
+    public CPU(FileSystem fileSystem) {
         this.generalRegisters = new ArrayList<>();
+        this.fileSystem = fileSystem;
+
         R1 = new Register("R1", "0000");
         R2 = new Register("R2", "0001");
         R3 = new Register("R3", "0010");
@@ -147,5 +152,17 @@ public class CPU {
 
         if (!process.checkState(ProcessState.FINISHED))
             saveValuesOfRegisters(process);
+        else
+            fileSystem.addFileToResultsDir(process.getName(), printResults(process.getName()));
+    }
+
+    private String printResults(String name) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Results of ").append(name).append(".asm").append("\n");
+
+        for (Register reg : generalRegisters)
+            sb.append(reg).append("\n");
+
+        return sb.toString();
     }
 }

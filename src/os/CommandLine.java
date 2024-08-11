@@ -30,9 +30,9 @@ public class CommandLine {
         System.out.println(fileSystem.listFiles());
     }
 
-    public static void rm(FileSystem fileSystem, Disk disk, String name) {
+    public static void rm(FileSystem fileSystem, String name) {
         try {
-            fileSystem.removeFileOrDirectory(name, disk);
+            fileSystem.removeFileOrDirectory(name);
         } catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
         }
@@ -63,8 +63,11 @@ public class CommandLine {
         scheduler.start();
     }
 
-    public static void mem(RAM ram) {
-        System.out.println(ram.printMemory());
+    public static void mem(String type, RAM ram, Disk disk) {
+        if (type.equals("-m"))
+            System.out.println(ram.printMemory());
+        else
+            System.out.println(disk.printDisk());
     }
 
     public static void ps(ProcessScheduler scheduler) {

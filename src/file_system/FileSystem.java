@@ -4,20 +4,25 @@ import memory.Disk;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 public class FileSystem {
     private Directory root;
     private Directory current;
     private String directoryPath;
     private static final String ROOT_PATH = "root";
+    private static final String RESULTS_PATH = "results";
+    private Disk disk;
 
     public FileSystem(Disk disk) {
         root = new Directory(ROOT_PATH, null);
         current = root;
         directoryPath = "root>";
+        this.disk = disk;
         createTree(root, new File(ROOT_PATH), disk);
     }
 
@@ -88,12 +93,28 @@ public class FileSystem {
         }
     }
 
+    public void addFileToResultsDir(String processName, String content) {
+        Directory resultDir = root.getChildDirectoryByName(RESULTS_PATH);
+        String filename = UUID.randomUUID().toString().replace("-", "").substring(0, 4) + "-" + processName + ".txt";
+        Path path = Paths.get(resultDir.getAbsolutePath() + "/" + filename);
+
+        try {
+            Files.createFile(path);
+            Files.writeString(path, content, StandardCharsets.UTF_8);
+
+            MyFile file = new MyFile(filename, (int) Files.size(path), Files.readAllLines(path));
+            resultDir.addChildFile(file, disk);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public String listFiles() {
         return current.toString();
     }
 
-    public void removeFileOrDirectory(String name, Disk disk) {
+    public void removeFileOrDirectory(String name) {
         MyFile file = current.getChildFileByName(name);
         Directory directory = current.getChildDirectoryByName(name);
 

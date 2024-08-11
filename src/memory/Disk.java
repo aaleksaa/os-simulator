@@ -8,13 +8,13 @@ public class Disk {
     private final int size;
     private List<Block> blocks;
     private NavigableMap<Integer, Integer> blocksTable;
-    private List<MyFile> files;
+    private Set<MyFile> files;
  
     public Disk() {
         this.size = 512;
         this.blocks = new ArrayList<>();
         this.blocksTable = new TreeMap<>();
-        this.files = new ArrayList<>();
+        this.files = new TreeSet<>(MyFile.compareByStartBlock);
  
         for (int i = 0; i < size / Block.SIZE; i++)
             blocks.add(new Block(i));
@@ -34,7 +34,7 @@ public class Disk {
         return blocksTable;
     }
  
-    public List<MyFile> getFiles() {
+    public Set<MyFile> getFiles() {
         return files;
     }
  
@@ -65,8 +65,8 @@ public class Disk {
             blocks.get(i).setAllocated(true);
  
         updateFreeBlocks(startBlock, requiredBlocks);
-        files.add(file);
         file.setStartBlock(startBlock);
+        files.add(file);
     }
  
     public void update(int startBlock, int length) {
