@@ -27,7 +27,7 @@ public class CommandLine {
     }
 
     public static void dir(FileSystem fileSystem) {
-        System.out.println(fileSystem.listFiles());
+        fileSystem.listFiles();
     }
 
     public static void rm(FileSystem fileSystem, String name) {
@@ -54,7 +54,7 @@ public class CommandLine {
             System.out.println("Process " + process.getName() + " is loaded!");
         } catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
-            System.out.println(ram.printMemory());
+            ram.printMemory();
         }
     }
     
@@ -65,13 +65,13 @@ public class CommandLine {
 
     public static void mem(String type, RAM ram, Disk disk) {
         if (type.equals("-m"))
-            System.out.println(ram.printMemory());
+            ram.printMemory();
         else
-            System.out.println(disk.printDisk());
+            disk.printDisk();
     }
 
     public static void ps(ProcessScheduler scheduler) {
-        System.out.println(scheduler.printProcesses());
+        scheduler.printProcesses();
     }
 
     public static void block(ProcessScheduler scheduler, int pid) {

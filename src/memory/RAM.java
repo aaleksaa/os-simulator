@@ -100,18 +100,11 @@ public class RAM {
         }
     }
 
-    public String printMemory() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("------------------------------------------------------------------------\n");
-        sb.append(String.format("%-20s %-20s %-20s%n", "TOTAL", "USED", "FREE"));
-        sb.append(String.format("%-20s %-20s %-20s%n", size, getBytesAllocated(), (size - getBytesAllocated())));
-        sb.append("------------------------------------------------------------------------\n");
-
-        for (Frame frame : frames)
-            if (frame.isAllocated())
-                sb.append(frame).append("\n");
-
-        return sb.toString();
+    public void printMemory() {
+        System.out.println("------------------------------------------------------------------------");
+        System.out.printf("%-20s %-20s %-20s%n", "TOTAL", "USED", "FREE");
+        System.out.printf("%-22s %-22s %-22s%n", size, getBytesAllocated(), (size - getBytesAllocated()));
+        System.out.println("------------------------------------------------------------------------");
+        frames.stream().filter(Frame::isAllocated).forEach(System.out::println);
     }
 }

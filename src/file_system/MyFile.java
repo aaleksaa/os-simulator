@@ -46,8 +46,12 @@ public class MyFile {
         this.startBlock = startBlock;
     }
 
+    public void printFile() {
+        System.out.printf("%-20s\t\t %-20s%n", "FILE", name);
+    }
+
     @Override
     public String toString() {
-        return name + " " + startBlock + " " + requiredBlocks;
+        return String.format("%-20s\t\t %-5s\t\t\t %-5s\n", name, startBlock, requiredBlocks);
     }
 }

@@ -67,15 +67,9 @@ public class ProcessScheduler extends Thread {
         }
     }
 
-    public String printProcesses() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(String.format("%-3s\t\t %-18s\t %-10s\t\t %-10s\n", "PID", "NAME", "STATE", "MEM"));
-
-        for (Process process : processes)
-            sb.append(process);
-
-        return sb.toString();
+    public void printProcesses() {
+        System.out.printf("%-3s\t\t %-18s\t %-10s\t\t %-10s\n", "PID", "NAME", "STATE", "MEM");
+        processes.forEach(System.out::print);
     }
 
     private void runProcess(Process process) {

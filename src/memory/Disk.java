@@ -101,18 +101,14 @@ public class Disk {
     }
  
     public MyFile getFileByName(String name) {
-        for (MyFile file : files)
-            if (file.getName().equals(name))
-                return file;
-        return null;
+        return files.stream()
+                .filter(f -> f.getName().equals(name))
+                .findFirst()
+                .orElse(null);
     }
  
-    public String printDisk() {
-        StringBuilder sb = new StringBuilder("Name Start Length\n");
- 
-        for (MyFile file : files)
-            sb.append(file).append("\n");
- 
-        return sb.toString();
+    public void printDisk() {
+        System.out.printf("%-20s\t\t %-5s\t\t %-5s\n", "NAME", "START", "LENGTH");
+        files.forEach(System.out::print);
     }
 }

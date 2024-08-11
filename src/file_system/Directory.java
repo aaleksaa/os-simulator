@@ -56,10 +56,10 @@ public class Directory {
     }
 
     public Directory getChildDirectoryByName(String name) {
-        for (Directory dir : directories)
-            if (dir.getName().equals(name))
-                return dir;
-        return null;
+        return directories.stream()
+                .filter(d -> d.getName().equals(name))
+                .findFirst()
+                .orElse(null);
     }
 
 
@@ -93,22 +93,20 @@ public class Directory {
         disk.allocateFile(file);
     }
 
+    public void printDirectory() {
+        if (isEmpty())
+            System.out.println("Directory " + name + " is empty!");
+        else {
+            System.out.println("Content of " + name);
+            System.out.printf("%-20s\t\t %-20s%n", "TYPE", "NAME");
+            directories.forEach(System.out::print);
+            files.forEach(MyFile::printFile);
+        }
+    }
+
     @Override
     public String toString() {
-        if (isEmpty())
-            return "Current directory " + name + " is empty!";
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("Content of ").append(name).append("\n");
-        sb.append("Type").append("\t\t").append("Name").append("\n");
-
-        for (Directory dir : directories)
-            sb.append("Directory").append("\t").append(dir.getName()).append("\n");
-
-        for (MyFile file : files)
-            sb.append("File").append("\t\t").append(file).append("\n");
-
-        return sb.toString();
+        return String.format("%-20s\t %-20s%n", "DIRECTORY", name);
     }
 
     @Override
@@ -129,10 +127,10 @@ public class Directory {
     }
 
     public MyFile getChildFileByName(String name) {
-        for (MyFile file : files)
-            if (file.getName().equals(name))
-                return file;
-        return null;
+        return files.stream()
+                .filter(f -> f.getName().equals(name))
+                .findFirst()
+                .orElse(null);
     }
 
     public Path toPath() {

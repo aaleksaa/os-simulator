@@ -110,8 +110,8 @@ public class FileSystem {
     }
 
 
-    public String listFiles() {
-        return current.toString();
+    public void listFiles() {
+        current.printDirectory();
     }
 
     public void removeFileOrDirectory(String name) {
