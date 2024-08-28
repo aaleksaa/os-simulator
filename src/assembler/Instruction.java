@@ -8,7 +8,9 @@ public enum Instruction {
     SUB("0100"),
     MUL("0101"),
     INC("0110"),
-    DEC("0111");
+    DEC("0111"),
+    JMP("1000"),
+    JZ("1001");
     private final String operationCode;
 
     private Instruction(String operationCode) {
@@ -25,6 +27,8 @@ public enum Instruction {
             case "DEC" -> DEC;
             case "LOAD" -> LOAD;
             case "STORE" -> STORE;
+            case "JMP" -> JMP;
+            case "JZ" -> JZ;
             default -> null;
         };
     }

@@ -2,6 +2,8 @@ package cpu;
 
 import assembler.Assembler;
 import file_system.FileSystem;
+import memory.Frame;
+import memory.Page;
 import memory.RAM;
 
 import java.io.File;
@@ -11,9 +13,9 @@ import java.util.List;
 
 public class CPU {
     private Register R1, R2, R3, R4, PC, IR;
-    private List<Register> generalRegisters;
-    private static final int TIME_QUANTUM = 2;
+    private final List<Register> generalRegisters;
     private FileSystem fileSystem;
+    private static final int TIME_QUANTUM = 2;
 
     public CPU(FileSystem fileSystem) {
         this.generalRegisters = new ArrayList<>();
@@ -44,14 +46,14 @@ public class CPU {
 
     public Register getRegisterByAddress(String address) {
         return generalRegisters.stream()
-                .filter(r -> r.getAddress().equals(address))
+                .filter(register -> register.getAddress().equals(address))
                 .findFirst()
                 .orElse(null);
     }
 
     public String getRegisterAddress(String name) {
         return generalRegisters.stream()
-                .filter(reg -> reg.getName().equals(name))
+                .filter(register -> register.getName().equals(name))
                 .map(Register::getAddress)
                 .findFirst()
                 .orElse(null);
@@ -74,7 +76,7 @@ public class CPU {
     }
 
     public void clearRegisters() {
-        generalRegisters.forEach(r -> r.setValue(0));
+        generalRegisters.forEach(register -> register.setValue(0));
         Assembler.accumulator = 0;
     }
 
@@ -90,6 +92,7 @@ public class CPU {
 
     private void executeMachineCode(Process process) {
         String instruction = IR.getStrValue().substring(0, 4);
+        boolean programCounterChanged = false;
 
         switch (instruction) {
             case "0000":
@@ -116,11 +119,21 @@ public class CPU {
             case "0111":
                 Assembler.dec();
                 break;
+            case "1000":
+                Assembler.jmp(this, IR.getStrValue().substring(4));
+                programCounterChanged = true;
+                break;
+            case "1001":
+                Assembler.jz(this, IR.getStrValue().substring(4));
+                programCounterChanged = true;
+                break;
         }
 
         System.out.println(printRegisters());
         process.decrementRemainingTime();
-        PC.incrementValue(1);
+
+        if (!programCounterChanged)
+            PC.incrementValue(1);
     }
 
     public void execute(RAM ram, Process process) {
@@ -131,29 +144,34 @@ public class CPU {
 
         List<String> pageTable = process.getPageTable();
 
-
         for (int i = 0; i < TIME_QUANTUM; i++) {
             if (process.checkState(ProcessState.FINISHED))
                 break;
 
-            int frameIndex = PC.getValue() / 2;
-            int index = PC.getValue() % 2;
+            int frameIndex = PC.getValue() / (Frame.SIZE / Page.PAGE_SIZE);
+            int index = PC.getValue() % (Frame.SIZE / Page.PAGE_SIZE);
             String instruction = ram.getInstruction(pageTable.get(frameIndex), index);
 
             IR.setStrValue(instruction);
             executeMachineCode(process);
 
             try {
-                Thread.sleep(3000);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        if (!process.checkState(ProcessState.FINISHED))
+        if (!process.checkState(ProcessState.FINISHED)) {
             saveValuesOfRegisters(process);
-        else
+            if (!process.checkState(ProcessState.BLOCKED))
+                process.setState(ProcessState.READY);
+        } else {
             fileSystem.addFileToResultsDir(process.getName(), printResults(process.getName()));
+            ram.remove(process);
+            process.clearPageTable();
+            process.setProgramCounter(-1);
+        }
     }
 
     private String printResults(String name) {

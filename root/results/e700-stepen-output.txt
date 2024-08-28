@@ -1,0 +1,5 @@
+Results of stepen.asm
+R1 [2]
+R2 [0]
+R3 [0]
+R4 [32]

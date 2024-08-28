@@ -1,0 +1,5 @@
+Results of file2.asm
+R1 [10]
+R2 [5]
+R3 [15]
+R4 [30]

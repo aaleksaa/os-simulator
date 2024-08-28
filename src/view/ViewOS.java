@@ -18,7 +18,7 @@ public class ViewOS extends Application {
     private final OS os = new OS();
     private final TextArea ta = new TextArea();
     private final TextField tf = new TextField();
-    private final Label lblTitle = new Label("OS simulator [Version 1.0]");
+    private final Label lblTitle = new Label("OS simulator");
     private final Label lblAuthor = new Label("Created by [Luka Nežić, Aleksa Aćić]");
     private final VBox vbLabels = new VBox(lblTitle, lblAuthor);
     private final VBox root = new VBox(10, vbLabels, ta, tf);
@@ -26,7 +26,7 @@ public class ViewOS extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Scene scene = new Scene(root, 900, 500);
+        Scene scene = new Scene(root, 1000, 600);
         setStyles();
 
         stage.setScene(scene);
@@ -38,11 +38,26 @@ public class ViewOS extends Application {
         System.out.println("Type \"help\" for list of commands!");
 
         tf.setOnKeyPressed(e -> {
-            if (e.getCode().equals(KeyCode.ENTER)) {
-                String command = tf.getText().trim();
-                System.out.println("> " + command);
-                os.executeCommand(command);
-                tf.clear();
+            String command;
+
+            switch (e.getCode()) {
+                case ENTER:
+                    command = tf.getText().trim();
+                    System.out.println("> " + command);
+                    if (command.equals("cls"))
+                        ta.clear();
+                    else
+                        os.executeCommand(command);
+                    tf.clear();
+                    break;
+                case DOWN:
+                    command = os.getCommandLine().getPreviousCommand();
+                    tf.setText(command);
+                    break;
+                case UP:
+                    command = os.getCommandLine().getNextCommand();
+                    tf.setText(command);
+                    break;
             }
         });
     }
@@ -51,13 +66,13 @@ public class ViewOS extends Application {
         VBox.setVgrow(ta, Priority.ALWAYS);
         root.setStyle("-fx-background-color: #2D2D2D");
         root.setPadding(new Insets(20));
-        lblTitle.setStyle("-fx-text-fill: #FFFFFF; -fx-font-size: 14px; -fx-font-weight: bold");
-        lblAuthor.setStyle("-fx-text-fill: #FFFFFF; -fx-font-size: 14px; -fx-font-weight: bold");
+        lblTitle.setStyle("-fx-text-fill: #FFFFFF; -fx-font-size: 18px; -fx-font-weight: bold");
+        lblAuthor.setStyle("-fx-text-fill: #FFFFFF; -fx-font-size: 18px; -fx-font-weight: bold");
         ta.setEditable(false);
         ta.setStyle(
                 "-fx-control-inner-background: #2D2D2D; " +
                         "-fx-text-fill: #FFFFFF; " +
-                        "-fx-font-size: 16px; " +
+                        "-fx-font-size: 20px; " +
                         "-fx-background-radius: 0; " +
                         "-fx-border-color: #FFFFFF; " +
                         "-fx-border-radius: 0; " +
@@ -66,7 +81,7 @@ public class ViewOS extends Application {
         tf.setStyle(
                 "-fx-control-inner-background: #2D2D2D; " +
                         "-fx-text-fill: #FFFFFF; " +
-                        "-fx-font-size: 16px; " +
+                        "-fx-font-size: 20px; " +
                         "-fx-background-radius: 0; " +
                         "-fx-border-color: #FFFFFF; " +
                         "-fx-border-radius: 0; " +

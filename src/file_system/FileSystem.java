@@ -11,17 +11,15 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 public class FileSystem {
-    private Directory root;
-    private Directory current;
-    private String directoryPath;
     private static final String ROOT_PATH = "root";
     private static final String RESULTS_PATH = "results";
-    private Disk disk;
+    private final Directory root;
+    private Directory current;
+    private final Disk disk;
 
     public FileSystem(Disk disk) {
         root = new Directory(ROOT_PATH, null);
         current = root;
-        directoryPath = "root>";
         this.disk = disk;
         createTree(root, new File(ROOT_PATH), disk);
     }
@@ -32,10 +30,6 @@ public class FileSystem {
 
     public Directory getCurrent() {
         return current;
-    }
-
-    public String getDirectoryPath() {
-        return directoryPath;
     }
 
     private void createTree(Directory dir, File root, Disk disk) {
@@ -54,10 +48,13 @@ public class FileSystem {
         }
     }
 
+    public void listFiles() {
+        current.printDirectoryContent();
+    }
+
     public void changeDirectory(String name) {
         if (name.equals("..") && current != root) {
             current = current.getParent();
-            updateDirectoryPath(name);
         }
         else {
             Directory childDir = current.getChildDirectoryByName(name);
@@ -66,19 +63,7 @@ public class FileSystem {
                 throw new IllegalArgumentException("Directory " + name + " does not exist!\n");
 
             current = childDir;
-            updateDirectoryPath(name);
         }
-    }
-
-    public void updateDirectoryPath(String name) {
-        StringBuilder sb = new StringBuilder(directoryPath);
-
-        if (name.equals(".."))
-            sb.replace(sb.lastIndexOf("\\"), sb.indexOf(">"), "");
-        else
-            sb.insert(sb.indexOf(">"), "\\" + name);
-
-        directoryPath = sb.toString();
     }
 
     public void makeDirectory(String name) {
@@ -93,33 +78,12 @@ public class FileSystem {
         }
     }
 
-    public void addFileToResultsDir(String processName, String content) {
-        Directory resultDir = root.getChildDirectoryByName(RESULTS_PATH);
-        String filename = UUID.randomUUID().toString().replace("-", "").substring(0, 4) + "-" + processName + ".txt";
-        Path path = Paths.get(resultDir.getAbsolutePath() + "/" + filename);
-
-        try {
-            Files.createFile(path);
-            Files.writeString(path, content, StandardCharsets.UTF_8);
-
-            MyFile file = new MyFile(filename, (int) Files.size(path), Files.readAllLines(path));
-            resultDir.addChildFile(file, disk);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    public void listFiles() {
-        current.printDirectory();
-    }
-
     public void removeFileOrDirectory(String name) {
         MyFile file = current.getChildFileByName(name);
         Directory directory = current.getChildDirectoryByName(name);
 
         if (file != null)
-            current.removeChildFile(file, disk);
+            current.removeChildFile(current, file, disk);
         else if (directory != null)
             current.removeChildDirectory(directory, disk);
         else
@@ -130,10 +94,48 @@ public class FileSystem {
         Directory dir = current.getChildDirectoryByName(oldName);
 
         if (dir == null)
-            throw new IllegalArgumentException("Directory with name " + oldName + " does not exist in " + current.getName());
+            throw new IllegalArgumentException("Directory with name \"" + oldName + "\" does not exist in \"" + current.getName() + "\"!");
         if (current.getChildDirectoryByName(newName) != null)
-            throw new IllegalArgumentException("Directory with name " + newName + " is already in " + current.getName());
+            throw new IllegalArgumentException("Directory with name \"" + newName + "\" is already in \"" + current.getName() + "\"!");
 
-        dir.setName(newName);
+        Path oldDirPath = Paths.get(current.getName(), oldName);
+        Path newDirPath = Paths.get(current.getName(), newName);
+
+        try {
+            dir.setName(newName);
+            System.out.println("Directory " + oldName + " successfully renamed to " + newName + "!");
+            Files.move(oldDirPath, newDirPath);
+        } catch (IOException e) {
+            System.err.println("Error with renaming directory!");
+        }
+    }
+
+    public void addFileToResultsDir(String processName, String content) {
+        Directory resultDir = root.getChildDirectoryByName(RESULTS_PATH);
+
+        if (resultDir == null) {
+            Path path = Paths.get(root.getAbsolutePath(), "results");
+            resultDir = new Directory("results", root);
+            root.addChildDirectory(resultDir);
+
+            try {
+                Files.createDirectory(path);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        String filename = UUID.randomUUID().toString().replace("-", "").substring(0, 4) + "-" + processName + "-output.txt";
+        Path path = Paths.get(resultDir.getAbsolutePath(), filename);
+
+        try {
+            Files.createFile(path);
+            Files.writeString(path, content, StandardCharsets.UTF_8);
+
+            resultDir.addChildFile(new MyFile(filename, (int) Files.size(path), Files.readAllLines(path)), disk);
+            System.out.println(filename + " created!");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

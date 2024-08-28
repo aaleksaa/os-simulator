@@ -1,6 +1,7 @@
 package memory;
 
 public class Frame {
+    public static final int SIZE = 32;
     private final String frameNumber;
     private boolean allocated;
     private int bytesAllocated;
@@ -29,7 +30,7 @@ public class Frame {
     public void setPage(Page page) {
         this.page = page;
         allocated = true;
-        bytesAllocated = page.getSize();
+        bytesAllocated = page.getTotalSize();
     }
 
     public void free() {

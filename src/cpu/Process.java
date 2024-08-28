@@ -2,6 +2,7 @@ package cpu;
 
 import assembler.Assembler;
 import memory.Disk;
+import memory.Frame;
 import memory.Page;
 import memory.RAM;
 
@@ -13,31 +14,27 @@ import java.util.List;
 public class Process {
     private final int pid;
     private final String name;
-    private int remainingTime;
-    private int size;
+    private final int size;
     private ProcessState state;
-    private List<Page> pages;
-    private List<String> pageTable;
+    private int remainingTime;
+    private final List<Page> pages = new ArrayList<>();
+    private final List<String> pageTable = new ArrayList<>();
     private int[] valueOfRegisters = new int[5];
     private int programCounter = -1;
-    public final static Comparator<Process> compareRT = (o1, o2) -> Integer.compare(o1.remainingTime, o2.remainingTime);
+    public final static Comparator<Process> compareRT = Comparator.comparingInt(o -> o.remainingTime);
 
-    public Process(int id, String name, Disk disk, CPU cpu, RAM ram) {
+    public Process(int id, String name, Disk disk, CPU cpu) {
         this.pid = id;
         this.name = name.substring(0, name.lastIndexOf('.'));
-        this.pages = new ArrayList<>();
-        this.pageTable = new ArrayList<>();
-        splitPages(name, disk, cpu, ram);
-        this.size = pages.stream().mapToInt(Page::getSize).sum();
+        splitPages(name, disk, cpu);
+        this.size = pages.stream().mapToInt(Page::getTotalSize).sum();
     }
 
-    private void splitPages(String name, Disk disk, CPU cpu, RAM ram) {
-        List<String> code = disk.getFileByName(name).getContent();
-        code.replaceAll(assemblyInstruction -> Assembler.transformAssemblyToMachineCode(cpu, assemblyInstruction));
+    private void splitPages(String name, Disk disk, CPU cpu) {
+        List<String> code = Assembler.transform(cpu, disk.getFileByName(name).getContent());
         this.remainingTime = code.size();
 
-        int frameSize = ram.getFrameSize();
-        int number = frameSize / 16;
+        int number = Frame.SIZE / Page.PAGE_SIZE;
         int counter = 0;
 
         while (counter < code.size()) {
@@ -51,12 +48,6 @@ public class Process {
 
             pages.add(page);
         }
-    }
-
-
-    @Override
-    public String toString() {
-        return String.format("%-3s\t\t %-18s\t\t %-10s\t %-10s\n", pid, name, state, size);
     }
 
     public int getPid() {
@@ -112,7 +103,7 @@ public class Process {
     }
 
     public void setValueOfRegisters(int[] valueOfRegisters) {
-        this.valueOfRegisters = Arrays.copyOf(valueOfRegisters, 4);
+        this.valueOfRegisters = Arrays.copyOf(valueOfRegisters, 5);
     }
 
     public void block() {
@@ -131,5 +122,18 @@ public class Process {
         } else {
             System.out.println(name + " is not blocked.");
         }
+    }
+
+    public void clearPageTable() {
+        pageTable.clear();
+    }
+
+    public boolean checkNameMatch(String inputName) {
+        return name.equals(inputName.substring(0, inputName.lastIndexOf('.')));
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%-3s\t\t %-18s\t\t %-10s\t %-10s\n", pid, name, state, size);
     }
 }

@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Objects;
 
 public class MyFile {
-    private String name;
-    private int size;
-    private int requiredBlocks;
+    private final String name;
+    private final int size;
+    private final List<String> content;
     private int startBlock;
-    private List<String> content;
+    private final int requiredBlocks;
 
-    public static final Comparator<MyFile> compareByStartBlock = (o1, o2) -> Integer.compare(o1.startBlock, o2.startBlock);
+    public static final Comparator<MyFile> compareByStartBlock = Comparator.comparingInt(o -> o.startBlock);
 
     public MyFile(String name, int size, List<String> content) {
         this.name = name;
@@ -47,11 +47,27 @@ public class MyFile {
     }
 
     public void printFile() {
-        System.out.printf("%-20s\t\t %-20s%n", "FILE", name);
+        System.out.printf("%-20s\t\t %-20s%n", "File", name);
     }
 
     @Override
     public String toString() {
-        return String.format("%-20s\t\t %-5s\t\t\t %-5s\n", name, startBlock, requiredBlocks);
+        return String.format("%-20s\t\t %-10s\t\t\t %-5s\n", name, startBlock, requiredBlocks);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        MyFile myFile = (MyFile) o;
+        return name.equals(myFile.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }

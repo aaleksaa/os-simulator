@@ -2,7 +2,7 @@ package memory;
 
 public class Block {
     public static final int SIZE = 4;
-    private int startAddress;
+    private final int startAddress;
     private boolean allocated;
 
     public Block(int startAddress) {

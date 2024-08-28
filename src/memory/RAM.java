@@ -10,26 +10,15 @@ import java.util.Queue;
 
 public class RAM {
     private final int size;
-    private List<Frame> frames;
-    private List<Integer> freeFrames;
-    private int frameSize;
-    private int numberOfFrames;
+    private final List<Frame> frames;
+    private final List<Integer> freeFrames;
+    private final int numberOfFrames;
 
-    public RAM() {
-        this.size = 4096;
-        this.frameSize = 32;
-        this.numberOfFrames = 128;
-        this.frames = new ArrayList<>();
-        this.freeFrames = new ArrayList<>();
-        init(numberOfFrames);
-    }
-
-    public RAM(int size, int frameSize) {
+    public RAM(int size) {
         this.frames = new ArrayList<>();
         this.freeFrames = new ArrayList<>();
         this.size = size;
-        this.frameSize = frameSize;
-        this.numberOfFrames = size / frameSize;
+        this.numberOfFrames = size / Frame.SIZE;
         init(numberOfFrames);
     }
 
@@ -49,10 +38,6 @@ public class RAM {
         return numberOfFrames;
     }
 
-    public int getFrameSize() {
-        return frameSize;
-    }
-
     public List<Frame> getFrames() {
         return frames;
     }
@@ -63,13 +48,12 @@ public class RAM {
 
     public void load(Process process) throws IllegalArgumentException {
         List<Page> pages = process.getPages();
-        int numberOfPages = pages.size();
         int pageCounter = 0;
 
-        if (freeFrames.size() < numberOfPages)
-            throw new IllegalArgumentException("Not enough space for process!\n" + numberOfPages);
+        if (freeFrames.size() < pages.size())
+            throw new IllegalArgumentException("Not enough space for process!\n");
 
-        while (pageCounter < numberOfPages) {
+        while (pageCounter < pages.size()) {
             int index = freeFrames.get(0);
             process.addToPageTable(frames.get(index).getFrameNumber());
             frames.get(index).setPage(pages.get(pageCounter++));
@@ -93,11 +77,14 @@ public class RAM {
 
     public void remove(Process process) {
         List<String> pageTable = process.getPageTable();
-        for (String s : pageTable) {
-            int index = Integer.parseInt(s, 16);
+
+        for (String page : pageTable) {
+            int index = Integer.parseInt(page, 16);
             frames.get(index).free();
             freeFrames.add(index);
         }
+
+        freeFrames.sort(Integer::compareTo);
     }
 
     public void printMemory() {

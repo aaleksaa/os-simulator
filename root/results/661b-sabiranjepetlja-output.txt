@@ -1,0 +1,5 @@
+Results of sabiranjepetlja.asm
+R1 [11]
+R2 [55]
+R3 [0]
+R4 [0]

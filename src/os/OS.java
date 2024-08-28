@@ -6,22 +6,21 @@ import file_system.FileSystem;
 import memory.Disk;
 import memory.RAM;
 
-import java.util.Scanner;
-
-
 public class OS {
     private final Disk disk;
     private final FileSystem fileSystem;
     private final RAM ram;
     private final CPU cpu;
     private final ProcessScheduler scheduler;
+    private final CommandLine commandLine;
 
     public OS() {
         this.disk = new Disk();
         this.fileSystem = new FileSystem(disk);
-        this.ram = new RAM();
+        this.ram = new RAM(4096);
         this.cpu = new CPU(fileSystem);
         this.scheduler = new ProcessScheduler(cpu, ram);
+        this.commandLine = new CommandLine();
     }
 
     public Disk getDisk() {
@@ -44,51 +43,11 @@ public class OS {
         return scheduler;
     }
 
-    public void executeCommand(String command) {
-        String[] parts = command.split(" ");
+    public CommandLine getCommandLine() {
+        return commandLine;
+    }
 
-        switch (parts[0]) {
-            case "cd":
-                CommandLine.cd(fileSystem, parts[1]);
-                break;
-            case "mkdir":
-                CommandLine.mkdir(fileSystem, parts[1]);
-                break;
-            case "dir":
-                CommandLine.dir(fileSystem);
-                break;
-            case "rm":
-                CommandLine.rm(fileSystem, parts[1]);
-                break;
-            case "ren":
-                CommandLine.ren(fileSystem, parts[1], parts[2]);
-                break;
-            case "load":
-                CommandLine.load(scheduler, disk, cpu, ram, parts[1]);
-                break;
-            case "run":
-                CommandLine.run(scheduler);
-                break;
-            case "mem":
-                CommandLine.mem(parts[1], ram, disk);
-                break;
-            case "ps":
-                CommandLine.ps(scheduler);
-                break;
-            case "exit":
-                CommandLine.exit();
-                break;
-            case "help":
-                CommandLine.help();
-                break;
-            case "block":
-                CommandLine.block(scheduler, Integer.parseInt(parts[1]));
-                break;
-            case "unblock":
-                CommandLine.unblock(scheduler, Integer.parseInt(parts[1]));
-                break;
-            default:
-                System.err.println("Unknown command!");
-        }
+    public void executeCommand(String command) {
+        commandLine.executeCommand(command, fileSystem, scheduler, disk, cpu, ram);
     }
 }

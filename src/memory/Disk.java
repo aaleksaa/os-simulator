@@ -6,12 +6,12 @@ import java.util.*;
  
 public class Disk {
     private final int size;
-    private List<Block> blocks;
-    private NavigableMap<Integer, Integer> blocksTable;
-    private Set<MyFile> files;
+    private final List<Block> blocks;
+    private final NavigableMap<Integer, Integer> blocksTable;
+    private final Set<MyFile> files;
  
     public Disk() {
-        this.size = 512;
+        this.size = 4096;
         this.blocks = new ArrayList<>();
         this.blocksTable = new TreeMap<>();
         this.files = new TreeSet<>(MyFile.compareByStartBlock);
@@ -41,12 +41,13 @@ public class Disk {
     private int findStartBlock(int length) {
         if (files.isEmpty())
             return 0;
- 
-        for (Map.Entry<Integer, Integer> entry : blocksTable.entrySet())
-            if (entry.getValue() >= length)
-                return entry.getKey();
- 
-        return -1;
+
+        return blocksTable.entrySet()
+                .stream()
+                .filter(entry -> entry.getValue() >= length)
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(-1);
     }
  
     private void updateFreeBlocks(int startBlock, int length) {
@@ -60,19 +61,22 @@ public class Disk {
  
         if (startBlock == -1)
             throw new IllegalArgumentException("Not enough space for this file!\n");
- 
+
         for (int i = startBlock; i < startBlock + requiredBlocks; i++)
             blocks.get(i).setAllocated(true);
- 
+
         updateFreeBlocks(startBlock, requiredBlocks);
         file.setStartBlock(startBlock);
         files.add(file);
     }
  
-    public void update(int startBlock, int length) {
+    private void updateBlocksTable(int startBlock, int length) {
         Map.Entry<Integer, Integer> prev = blocksTable.lowerEntry(startBlock);
         Map.Entry<Integer, Integer> next = blocksTable.higherEntry(startBlock);
- 
+
+        System.out.println(prev);
+        System.out.println(next);
+
         if (prev == null && next != null)
             blocksTable.put(startBlock, length);
         else if (prev != null && next == null)
@@ -97,18 +101,19 @@ public class Disk {
             blocks.get(i).setAllocated(false);
  
         files.remove(file);
-        update(startBlock, requiredBlocks);
+        updateBlocksTable(startBlock, requiredBlocks);
     }
  
     public MyFile getFileByName(String name) {
         return files.stream()
-                .filter(f -> f.getName().equals(name))
+                .filter(file -> file.getName().equals(name))
                 .findFirst()
                 .orElse(null);
     }
  
     public void printDisk() {
-        System.out.printf("%-20s\t\t %-5s\t\t %-5s\n", "NAME", "START", "LENGTH");
+        System.out.printf("%-20s\t\t %-5s\t\t\t %-5s\n", "NAME", "START", "LENGTH");
+        System.out.println("-------------------------------------------------------------");
         files.forEach(System.out::print);
     }
 }

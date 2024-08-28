@@ -5,19 +5,16 @@ import memory.RAM;
 import java.util.*;
 
 public class ProcessScheduler extends Thread {
-    private CPU cpu;
-    private RAM ram;
-    private PriorityQueue<Process> readyQueue;
-    private Queue<Process> waitingQueue;
-    private List<Process> processes;
+    private final CPU cpu;
+    private final RAM ram;
+    private final PriorityQueue<Process> readyQueue = new PriorityQueue<>(Process.compareRT);
+    private final Queue<Process> waitingQueue = new LinkedList<>();
+    private final List<Process> processes = new ArrayList<>();
     private Process currentProcess;
 
     public ProcessScheduler(CPU cpu, RAM ram) {
         this.cpu = cpu;
         this.ram = ram;
-        this.readyQueue = new PriorityQueue<>(Process.compareRT);
-        this.waitingQueue = new LinkedList<>();
-        this.processes = new ArrayList<>();
     }
 
     public PriorityQueue<Process> getReadyQueue() {
@@ -32,8 +29,11 @@ public class ProcessScheduler extends Thread {
         return currentProcess;
     }
 
-    public void addProcess(Process process) {
+    public void addToQueue(Process process) {
         readyQueue.add(process);
+    }
+
+    public void addToList(Process process) {
         processes.add(process);
     }
 
@@ -42,15 +42,25 @@ public class ProcessScheduler extends Thread {
     }
 
     public Process getProcessByPID(int pid) {
-        return processes.stream().filter(p -> p.getPid() == pid).findFirst().orElse(null);
+        return processes.stream()
+                .filter(process -> process.getPid() == pid)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public Process getProcessByName(String name) {
+        return processes.stream()
+                .filter(process -> process.checkNameMatch(name))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
     public void run() {
         while (!readyQueue.isEmpty() || !waitingQueue.isEmpty()) {
             Process process = !readyQueue.isEmpty() ? readyQueue.poll() : waitingQueue.poll();
-
             currentProcess = process;
+
             if (currentProcess.checkState(ProcessState.BLOCKED))
                 waitingQueue.add(currentProcess);
             else {
@@ -73,16 +83,14 @@ public class ProcessScheduler extends Thread {
     }
 
     private void runProcess(Process process) {
-        if (process.getProgramCounter() == -1) {
-            System.out.println(process.getName() + " (PID = " + process.getPid() + ") started execution.");
+        System.out.println(process.getName() + " (PID = " + process.getPid() + ") is executing.");
+
+        if (process.getProgramCounter() == -1)
             cpu.getPC().setValue(0);
-            process.setState(ProcessState.RUNNING);
-            cpu.execute(ram, currentProcess);
-        } else {
-            System.out.println(process.getName() + " (PID = " + process.getPid() + ") continued execution.");
+        else
             cpu.loadValuesOfRegisters(currentProcess);
-            process.setState(ProcessState.RUNNING);
-            cpu.execute(ram, currentProcess);
-        }
+
+        process.setState(ProcessState.RUNNING);
+        cpu.execute(ram, currentProcess);
     }
 }

@@ -4,13 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Page {
-    private int size;
-    private List<String> content;
-
-    public Page(List<String> content) {
-        this.size = content.size() * 16;
-        this.content = content;
-    }
+    public static final int PAGE_SIZE = 16;
+    private int totalSize;
+    private final List<String> content;
 
     public Page() {
         this.content = new ArrayList<>();
@@ -18,11 +14,11 @@ public class Page {
 
     public void add(String input) {
         content.add(input);
-        size += 16;
+        totalSize += PAGE_SIZE;
     }
 
-    public int getSize() {
-        return size;
+    public int getTotalSize() {
+        return totalSize;
     }
 
     public List<String> getContent() {
